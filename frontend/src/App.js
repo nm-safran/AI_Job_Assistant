@@ -43,41 +43,77 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
-        <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            🤖 AI Job Application Assistant
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 animate-fade-in">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Enhanced Header */}
+        <header className="text-center mb-12 animate-slide-up">
+          <div className="inline-block mb-4">
+            <div className="text-6xl mb-4 animate-bounce">🤖</div>
+          </div>
+          <h1 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+            AI Job Application Assistant
           </h1>
-          <p className="text-lg text-gray-600">
-            Smart resume analysis, job matching, and cover letter generation
+          <p className="text-xl text-gray-700 font-medium max-w-2xl mx-auto">
+            ✨ Smart resume analysis • 🎯 Job matching • 📝 AI-powered cover letters
           </p>
+          <div className="mt-6 flex justify-center gap-4 flex-wrap">
+            <span className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold shadow-sm">AI-Powered</span>
+            <span className="px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold shadow-sm">7-Tab Analysis</span>
+            <span className="px-4 py-2 bg-pink-100 text-pink-700 rounded-full text-sm font-semibold shadow-sm">Instant Results</span>
+          </div>
         </header>
 
-        {/* Progress Steps */}
-        <div className="flex justify-center mb-8">
-          {[1, 2, 3, 4].map(step => (
-            <div key={step} className="flex items-center">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 font-semibold transition-all ${currentStep >= step
-                ? 'bg-primary text-white border-primary'
-                : 'bg-white text-gray-400 border-gray-300'
-                }`}>
-                {step}
+        {/* Enhanced Progress Steps */}
+        <div className="mb-12 animate-scale-in">
+          <div className="flex justify-center mb-4">
+            {[1, 2, 3, 4].map(step => (
+              <div key={step} className="flex items-center">
+                <div className="relative">
+                  <div
+                    className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg transition-all duration-300 ${currentStep >= step
+                        ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg scale-110'
+                        : 'bg-white text-gray-400 border-2 border-gray-300'
+                      }`}
+                  >
+                    {currentStep > step ? '✓' : step}
+                  </div>
+                  {currentStep === step && (
+                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-30 blur animate-pulse"></div>
+                  )}
+                </div>
+                {step < 4 && (
+                  <div className="relative w-20 h-1 mx-2">
+                    <div className="absolute inset-0 bg-gray-300 rounded"></div>
+                    <div
+                      className={`absolute inset-0 rounded transition-all duration-500 ${currentStep > step ? 'bg-gradient-to-r from-blue-500 to-purple-600' : 'w-0'
+                        }`}
+                    ></div>
+                  </div>
+                )}
               </div>
-              {step < 4 && (
-                <div className={`w-16 h-1 mx-2 transition-all ${currentStep > step ? 'bg-primary' : 'bg-gray-300'
-                  }`}></div>
-              )}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {/* Step Labels */}
-        <div className="flex justify-center mb-8 text-sm font-medium text-gray-600">
-          <div className="w-24 text-center">Upload Resume</div>
-          <div className="w-24 text-center">Job Analysis</div>
-          <div className="w-24 text-center">AI Analysis</div>
-          <div className="w-24 text-center">Cover Letter</div>
+          {/* Step Labels with Icons */}
+          <div className="flex justify-center text-sm">
+            {[
+              { label: 'Upload Resume', icon: '📄' },
+              { label: 'Job Details', icon: '💼' },
+              { label: 'AI Analysis', icon: '🤖' },
+              { label: 'Cover Letter', icon: '✍️' }
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                className={`w-32 text-center transition-all duration-300 ${currentStep === idx + 1
+                    ? 'text-purple-700 font-bold scale-105'
+                    : 'text-gray-500'
+                  }`}
+              >
+                <div className="text-xl mb-1">{item.icon}</div>
+                <div>{item.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Step Content */}

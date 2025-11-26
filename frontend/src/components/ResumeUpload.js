@@ -72,8 +72,8 @@ const ResumeUpload = ({ onUpload }) => {
 
       <div
         className={`border-3 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all duration-300 ${isDragging
-            ? 'border-primary bg-blue-50 scale-105'
-            : 'border-gray-300 bg-gray-50 hover:border-primary hover:bg-blue-50'
+          ? 'border-primary bg-blue-50 scale-105'
+          : 'border-gray-300 bg-gray-50 hover:border-primary hover:bg-blue-50'
           } ${isUploading ? 'opacity-50' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -117,30 +117,30 @@ const ResumeUpload = ({ onUpload }) => {
         />
       </div>
 
-      {/* Features */}
+      {/* Enhanced Features Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-        <div className="text-center p-4">
-          <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-            <span className="text-blue-600 text-xl">🔍</span>
+        <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <span className="text-white text-2xl">🔍</span>
           </div>
-          <h3 className="font-semibold text-gray-800 mb-2">AI Analysis</h3>
-          <p className="text-gray-600 text-sm">Advanced NLP extracts skills, experience, and education from your resume</p>
+          <h3 className="font-bold text-gray-800 mb-2 text-lg">AI Analysis</h3>
+          <p className="text-gray-600 text-sm leading-relaxed">Advanced NLP extracts skills, experience, and education from your resume</p>
         </div>
 
-        <div className="text-center p-4">
-          <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-            <span className="text-green-600 text-xl">🎯</span>
+        <div className="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+          <div className="bg-gradient-to-br from-green-500 to-green-600 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <span className="text-white text-2xl">🎯</span>
           </div>
-          <h3 className="font-semibold text-gray-800 mb-2">Smart Matching</h3>
-          <p className="text-gray-600 text-sm">Compare your profile with job requirements and get match scores</p>
+          <h3 className="font-bold text-gray-800 mb-2 text-lg">Smart Matching</h3>
+          <p className="text-gray-600 text-sm leading-relaxed">Compare your profile with job requirements and get match scores</p>
         </div>
 
-        <div className="text-center p-4">
-          <div className="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-            <span className="text-purple-600 text-xl">💡</span>
+        <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <span className="text-white text-2xl">💡</span>
           </div>
-          <h3 className="font-semibold text-gray-800 mb-2">Personalized Tips</h3>
-          <p className="text-gray-600 text-sm">Get AI-powered suggestions for skill improvement and interview prep</p>
+          <h3 className="font-bold text-gray-800 mb-2 text-lg">Personalized Tips</h3>
+          <p className="text-gray-600 text-sm leading-relaxed">Get AI-powered suggestions for skill improvement and interview prep</p>
         </div>
       </div>
     </div>
