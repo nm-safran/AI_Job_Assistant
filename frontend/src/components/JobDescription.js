@@ -47,103 +47,117 @@ const JobDescription = ({ jobDescription, onChange, sessionId, onNext, onBack })
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-8">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">Job Description Analysis</h2>
-        <p className="text-gray-600 max-w-2xl mx-auto">
-          Paste the job description you're interested in. Our AI will analyze the requirements and extract key skills.
-        </p>
-      </div>
-
-      <div className="mb-8">
-        <label className="block text-lg font-medium text-gray-700 mb-4">
-          Job Description *
-        </label>
-        <textarea
-          value={jobDescription}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="Paste the complete job description here. Include requirements, responsibilities, and qualifications..."
-          className="w-full h-80 p-6 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent resize-none text-gray-700 placeholder-gray-400 text-lg"
-          disabled={isAnalyzing}
-        />
-        <div className="flex justify-between items-center mt-2">
-          <span className="text-sm text-gray-500">
-            {jobDescription.length} characters • {jobDescription.split(/\s+/).filter(word => word.length > 0).length} words
-          </span>
-          <button
-            onClick={analyzeJobDescription}
-            disabled={!jobDescription.trim() || isAnalyzing}
-            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-400 transition-colors text-sm font-medium"
-          >
-            {isAnalyzing ? 'Analyzing...' : 'Analyze JD'}
-          </button>
-        </div>
-      </div>
-
-      {analysis && (
-        <div className="mb-8 p-6 bg-blue-50 rounded-xl border border-blue-200">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <span className="bg-blue-100 p-2 rounded-lg mr-3">📊</span>
-            Job Analysis Results
+    <div className="space-y-6">
+      <div className="glass-card p-8">
+        <div className="mb-8">
+          <h3 className="text-2xl font-bold text-cream-50 mb-3">
+            Paste Job Description
           </h3>
+          <p className="text-charcoal-300">
+            Add the complete job posting. Our AI will extract requirements, skills, and responsibilities.
+          </p>
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-medium text-gray-700 mb-3">Required Skills</h4>
-              <div className="flex flex-wrap gap-2">
-                {analysis.skills.map((skill, index) => (
-                  <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                    {skill}
-                  </span>
-                ))}
-              </div>
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-cream-100 mb-3">
+            Job Description *
+          </label>
+          <textarea
+            value={jobDescription}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Paste the full job description here...\n\nInclude:\n• Job title and company\n• Required skills and qualifications\n• Responsibilities\n• Experience level\n• Education requirements"
+            className="input-field h-96 resize-none font-mono text-sm"
+            disabled={isAnalyzing}
+          />
+          <div className="flex justify-between items-center mt-3">
+            <div className="flex items-center gap-4 text-xs text-charcoal-400">
+              <span className="flex items-center gap-1">
+                <span className="text-amber-400">▪</span>
+                {jobDescription.length} chars
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="text-amber-400">▪</span>
+                {jobDescription.split(/\s+/).filter(word => word.length > 0).length} words
+              </span>
             </div>
+            <button
+              onClick={analyzeJobDescription}
+              disabled={!jobDescription.trim() || isAnalyzing}
+              className="btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isAnalyzing ? '⚡ Analyzing...' : '⚡ Quick Analysis'}
+            </button>
+          </div>
+        </div>
 
-            <div className="space-y-4">
+        {analysis && (
+          <div className="glass-card p-6">
+            <h3 className="text-xl font-bold text-cream-50 mb-6 flex items-center gap-3">
+              <span className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center border border-amber-500/30">
+                📊
+              </span>
+              Quick Analysis Preview
+            </h3>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
-                <h4 className="font-medium text-gray-700 mb-2">Experience Level</h4>
-                <p className="text-gray-600 bg-white px-3 py-2 rounded-lg border">
-                  {analysis.experience_level}
-                </p>
+                <h4 className="font-semibold text-cream-100 mb-3 text-sm uppercase tracking-wider">Required Skills</h4>
+                <div className="flex flex-wrap gap-2">
+                  {analysis.skills.map((skill, index) => (
+                    <span key={index} className="badge-amber">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
               </div>
 
-              <div>
-                <h4 className="font-medium text-gray-700 mb-2">Education Requirements</h4>
-                <div className="space-y-1">
-                  {analysis.education_requirements.length > 0 ? (
-                    analysis.education_requirements.map((edu, index) => (
-                      <p key={index} className="text-gray-600 text-sm bg-white px-3 py-1 rounded border">
-                        {edu}
-                      </p>
-                    ))
-                  ) : (
-                    <p className="text-gray-500 text-sm">Not specified</p>
-                  )}
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold text-cream-100 mb-2 text-sm uppercase tracking-wider">Experience Level</h4>
+                  <p className="text-charcoal-200 bg-charcoal-700/30 px-4 py-2 rounded-lg border border-charcoal-600">
+                    {analysis.experience_level}
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-cream-100 mb-2 text-sm uppercase tracking-wider">Education Requirements</h4>
+                  <div className="space-y-2">
+                    {analysis.education_requirements.length > 0 ? (
+                      analysis.education_requirements.map((edu, index) => (
+                        <p key={index} className="text-charcoal-200 text-sm bg-charcoal-700/30 px-4 py-2 rounded-lg border border-charcoal-600">
+                          {edu}
+                        </p>
+                      ))
+                    ) : (
+                      <p className="text-charcoal-400 text-sm">Not specified</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
+
+            {analysis.key_responsibilities.length > 0 && (
+              <div className="col-span-full mt-2">
+                <h4 className="font-semibold text-cream-100 mb-3 text-sm uppercase tracking-wider">Key Responsibilities</h4>
+                <ul className="space-y-2">
+                  {analysis.key_responsibilities.slice(0, 3).map((responsibility, index) => (
+                    <li key={index} className="text-charcoal-200 text-sm bg-charcoal-700/30 px-4 py-3 rounded-lg border border-charcoal-600 flex items-start gap-2">
+                      <span className="text-amber-400 mt-0.5">▸</span>
+                      {responsibility}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
+        )}
+      </div>
 
-          {analysis.key_responsibilities.length > 0 && (
-            <div className="mt-4">
-              <h4 className="font-medium text-gray-700 mb-2">Key Responsibilities</h4>
-              <ul className="space-y-2">
-                {analysis.key_responsibilities.slice(0, 3).map((responsibility, index) => (
-                  <li key={index} className="text-gray-600 text-sm bg-white px-3 py-2 rounded border flex items-start">
-                    <span className="text-blue-500 mr-2 mt-1">•</span>
-                    {responsibility}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="flex justify-between items-center pt-6 border-t border-gray-200">
+      {/* Navigation */}
+      <div className="flex justify-between items-center gap-4">
         <button
           onClick={onBack}
-          className="bg-gray-300 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-400 transition-colors font-medium"
+          className="btn-ghost"
         >
           ← Back
         </button>
@@ -151,21 +165,21 @@ const JobDescription = ({ jobDescription, onChange, sessionId, onNext, onBack })
         <button
           onClick={handleNext}
           disabled={!jobDescription.trim()}
-          className="bg-primary text-white px-8 py-3 rounded-lg hover:bg-secondary transition-colors font-medium disabled:bg-gray-400"
+          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
           Continue to Analysis →
         </button>
       </div>
 
       {/* Tips */}
-      <div className="mt-8 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-        <h4 className="font-medium text-yellow-800 mb-2 flex items-center">
-          <span className="mr-2">💡</span>
-          Pro Tip
+      <div className="glass-card p-5 border-amber-500/20">
+        <h4 className="font-semibold text-amber-400 mb-2 flex items-center gap-2">
+          <span>💡</span>
+          <span>Pro Tip</span>
         </h4>
-        <p className="text-yellow-700 text-sm">
-          For best results, include the complete job description with requirements, responsibilities, and qualifications.
-          The more detailed the description, the better our AI can analyze skill matches.
+        <p className="text-charcoal-300 text-sm leading-relaxed">
+          Include the complete job posting with all requirements, responsibilities, and qualifications.
+          More detail = better AI analysis and personalized recommendations.
         </p>
       </div>
     </div>
