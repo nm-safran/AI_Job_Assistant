@@ -39,7 +39,8 @@ const AnalysisResults = ({ resumeData, jobDescription, sessionId, onNext, onBack
 
       if (data.success) {
         setMatchAnalysis(data);
-        onNext(data);
+        // Don't auto-advance to next step - let user explore 7 tabs first
+        // onNext(data);
       } else {
         alert('Error analyzing match: ' + data.error);
       }
@@ -281,7 +282,7 @@ const AnalysisResults = ({ resumeData, jobDescription, sessionId, onNext, onBack
             <button
               onClick={() => {
                 window.scrollTo(0, 0);
-                onNext();
+                onNext(matchAnalysis);
               }}
               className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-bold shadow-lg"
             >
