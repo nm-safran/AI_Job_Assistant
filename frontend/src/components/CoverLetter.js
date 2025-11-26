@@ -138,41 +138,41 @@ const CoverLetter = ({ resumeData, jobDescription, sessionId, analysisResults, o
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-8">
+    <div className="glass-card p-8">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">✍️ AI Cover Letter Generator</h2>
-        <p className="text-gray-600 max-w-2xl mx-auto">
+        <h2 className="text-3xl font-bold text-cream-50 mb-4">✍️ AI Cover Letter Generator</h2>
+        <p className="text-charcoal-300 max-w-2xl mx-auto">
           Generate personalized cover letters in different tones based on your resume and the job requirements.
         </p>
       </div>
 
       {/* Tone Selection */}
       <div className="mb-8">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Select Tone Style</h3>
+        <h3 className="text-lg font-bold text-cream-100 mb-4">Select Tone Style</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {tones.map(tone => (
             <button
               key={tone.key}
               onClick={() => setActiveTone(tone.key)}
-              className={`p-4 rounded-xl border-2 text-center transition-all hover:shadow-md ${activeTone === tone.key
-                  ? 'border-primary bg-blue-50 shadow-sm'
-                  : 'border-gray-200 bg-white hover:border-primary'
+              className={`p-4 rounded-xl border-2 text-center transition-all hover:shadow-glow ${activeTone === tone.key
+                ? 'border-amber-500 bg-amber-500/10 shadow-glow'
+                : 'border-charcoal-700 bg-charcoal-800/40 hover:border-amber-500'
                 }`}
             >
               <div className="text-2xl mb-2">{tone.icon}</div>
-              <div className="font-medium text-gray-800 text-sm mb-1">{tone.name}</div>
-              <div className="text-xs text-gray-500">{tone.description}</div>
+              <div className="font-medium text-cream-200 text-sm mb-1">{tone.name}</div>
+              <div className="text-xs text-charcoal-400">{tone.description}</div>
             </button>
           ))}
         </div>
       </div>
 
       {/* Customization Options */}
-      <div className="bg-gray-50 rounded-xl p-6 mb-8">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Customization Options</h3>
+      <div className="glass-card p-6">
+        <h3 className="text-lg font-bold text-cream-100 mb-4">Customization Options</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Object.entries(customizations).map(([key, value]) => (
-            <label key={key} className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary transition-colors cursor-pointer">
+            <label key={key} className="flex items-center space-x-3 p-3 glass-card-hover rounded-lg cursor-pointer">
               <input
                 type="checkbox"
                 checked={value}
@@ -180,9 +180,9 @@ const CoverLetter = ({ resumeData, jobDescription, sessionId, analysisResults, o
                   ...prev,
                   [key]: e.target.checked
                 }))}
-                className="rounded text-primary focus:ring-primary"
+                className="rounded text-amber-500 focus:ring-amber-500 bg-charcoal-700 border-charcoal-600"
               />
-              <span className="text-gray-700 capitalize">
+              <span className="text-cream-200 capitalize">
                 {key.replace(/_/g, ' ')}
               </span>
             </label>
@@ -191,15 +191,15 @@ const CoverLetter = ({ resumeData, jobDescription, sessionId, analysisResults, o
       </div>
 
       {/* Action Buttons */}
-      <div className="flex flex-wrap gap-3 mb-8">
+      <div className="flex flex-wrap gap-3">
         <button
           onClick={() => generateCoverLetter(activeTone)}
           disabled={isGenerating || generatingAll}
-          className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-secondary disabled:bg-gray-400 transition-colors font-medium flex items-center"
+          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
           {isGenerating ? (
             <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-charcoal-900 border-t-transparent"></div>
               Generating...
             </>
           ) : (
@@ -210,11 +210,11 @@ const CoverLetter = ({ resumeData, jobDescription, sessionId, analysisResults, o
         <button
           onClick={generateAllCoverLetters}
           disabled={generatingAll || isGenerating}
-          className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 transition-colors font-medium flex items-center"
+          className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
           {generatingAll ? (
             <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-amber-500 border-t-transparent"></div>
               Generating All...
             </>
           ) : (
@@ -225,7 +225,7 @@ const CoverLetter = ({ resumeData, jobDescription, sessionId, analysisResults, o
         {Object.keys(coverLetters).length > 0 && (
           <button
             onClick={downloadAllCoverLetters}
-            className="bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 transition-colors font-medium flex items-center"
+            className="btn-secondary flex items-center gap-2"
           >
             📥 Download All
           </button>
@@ -233,21 +233,21 @@ const CoverLetter = ({ resumeData, jobDescription, sessionId, analysisResults, o
       </div>
 
       {/* Cover Letter Display */}
-      <div className="bg-white rounded-xl border-2 border-gray-200 p-6 mb-8">
+      <div className="glass-card p-6 mb-8">
         {isGenerating || generatingAll ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg mb-2">AI is crafting your perfect cover letter...</p>
-            <p className="text-gray-500">This may take a few moments</p>
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-amber-500 border-t-transparent mx-auto mb-4"></div>
+            <p className="text-charcoal-300 text-lg mb-2">AI is crafting your perfect cover letter...</p>
+            <p className="text-charcoal-400">This may take a few moments</p>
           </div>
         ) : coverLetters[activeTone] ? (
           <div>
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
               <div>
-                <h3 className="text-xl font-semibold text-gray-800">
+                <h3 className="text-xl font-bold text-cream-100">
                   {getToneDisplayName(activeTone)} Cover Letter
                 </h3>
-                <p className="text-gray-500 text-sm">
+                <p className="text-charcoal-400 text-sm">
                   Generated: {new Date(coverLetters[activeTone].generated_at).toLocaleString()}
                 </p>
               </div>
@@ -255,13 +255,13 @@ const CoverLetter = ({ resumeData, jobDescription, sessionId, analysisResults, o
               <div className="flex space-x-3 mt-3 lg:mt-0">
                 <button
                   onClick={() => copyToClipboard(activeTone)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium flex items-center"
+                  className="btn-ghost text-sm font-medium flex items-center"
                 >
                   📋 Copy
                 </button>
                 <button
                   onClick={() => downloadCoverLetter(activeTone)}
-                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm font-medium flex items-center"
+                  className="btn-secondary text-sm font-medium flex items-center"
                 >
                   📥 Download
                 </button>
@@ -281,23 +281,23 @@ const CoverLetter = ({ resumeData, jobDescription, sessionId, analysisResults, o
                     }
                   }));
                 }}
-                className="w-full h-96 p-6 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent resize-none font-mono text-sm leading-relaxed"
+                className="w-full h-96 p-6 input-field rounded-xl resize-none font-mono text-sm leading-relaxed"
                 spellCheck="false"
               />
             </div>
 
-            <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
-              <span className="text-sm text-gray-500">
+            <div className="flex justify-between items-center mt-4 pt-4 border-t border-charcoal-700">
+              <span className="text-sm text-charcoal-400">
                 Word count: <strong>{coverLetters[activeTone].word_count}</strong> •
                 Tone: <strong>{getToneDisplayName(activeTone)}</strong>
               </span>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-charcoal-500">
                 Feel free to edit the generated content
               </span>
             </div>
           </div>
         ) : (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-charcoal-300">
             <div className="text-6xl mb-4">📝</div>
             <p className="text-lg mb-2">No cover letter generated yet</p>
             <p className="text-sm">Select a tone and click generate to create your first cover letter</p>
@@ -306,40 +306,42 @@ const CoverLetter = ({ resumeData, jobDescription, sessionId, analysisResults, o
       </div>
 
       {/* Generated Letters Preview */}
-      {Object.keys(coverLetters).length > 0 && (
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Generated Letters</h3>
-          <div className="flex flex-wrap gap-3">
-            {Object.keys(coverLetters).map(tone => (
-              <button
-                key={tone}
-                onClick={() => setActiveTone(tone)}
-                className={`px-4 py-2 rounded-lg border transition-colors flex items-center space-x-2 ${activeTone === tone
-                    ? 'bg-primary text-white border-primary'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-primary'
-                  }`}
-              >
-                <span>{tones.find(t => t.key === tone)?.icon}</span>
-                <span>{getToneDisplayName(tone)}</span>
-              </button>
-            ))}
+      {
+        Object.keys(coverLetters).length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-lg font-bold text-cream-100 mb-4">Generated Letters</h3>
+            <div className="flex flex-wrap gap-3">
+              {Object.keys(coverLetters).map(tone => (
+                <button
+                  key={tone}
+                  onClick={() => setActiveTone(tone)}
+                  className={`px-4 py-2 rounded-lg border transition-colors flex items-center space-x-2 ${activeTone === tone
+                    ? 'bg-amber-500/10 text-amber-400 border-amber-500'
+                    : 'bg-charcoal-800/40 text-cream-100 border-charcoal-700 hover:border-amber-500'
+                    }`}
+                >
+                  <span>{tones.find(t => t.key === tone)?.icon}</span>
+                  <span>{getToneDisplayName(tone)}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Navigation */}
       <div className="flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0">
         <div className="space-x-4">
           <button
             onClick={onBack}
-            className="bg-gray-300 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-400 transition-colors font-medium"
+            className="btn-ghost px-8 py-3"
           >
             ← Back to Analysis
           </button>
 
           <button
             onClick={onReset}
-            className="bg-gray-500 text-white px-8 py-3 rounded-lg hover:bg-gray-600 transition-colors font-medium"
+            className="btn-secondary px-8 py-3"
           >
             🏠 Start Over
           </button>
@@ -351,7 +353,7 @@ const CoverLetter = ({ resumeData, jobDescription, sessionId, analysisResults, o
               onClick={() => {
                 Object.keys(coverLetters).forEach(tone => copyToClipboard(tone));
               }}
-              className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+              className="btn-primary"
             >
               📋 Copy All
             </button>
@@ -360,31 +362,31 @@ const CoverLetter = ({ resumeData, jobDescription, sessionId, analysisResults, o
       </div>
 
       {/* Tips */}
-      <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
-        <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
+      <div className="mt-8 glass-card p-6">
+        <h4 className="font-bold text-amber-400 mb-3 flex items-center">
           <span className="text-xl mr-2">💡</span>
           Cover Letter Tips
         </h4>
-        <ul className="space-y-2 text-blue-700">
+        <ul className="space-y-2 text-charcoal-200">
           <li className="flex items-start">
-            <span className="text-blue-500 mr-2 mt-1">•</span>
+            <span className="text-amber-400 mr-2 mt-1">•</span>
             <span><strong>Customize each letter</strong> - Edit the generated content to make it more personal</span>
           </li>
           <li className="flex items-start">
-            <span className="text-blue-500 mr-2 mt-1">•</span>
+            <span className="text-amber-400 mr-2 mt-1">•</span>
             <span><strong>Match the tone</strong> - Use professional tone for corporate jobs, enthusiastic for startups</span>
           </li>
           <li className="flex items-start">
-            <span className="text-blue-500 mr-2 mt-1">•</span>
+            <span className="text-amber-400 mr-2 mt-1">•</span>
             <span><strong>Include specific examples</strong> - Add concrete achievements from your resume</span>
           </li>
           <li className="flex items-start">
-            <span className="text-blue-500 mr-2 mt-1">•</span>
+            <span className="text-amber-400 mr-2 mt-1">•</span>
             <span><strong>Proofread carefully</strong> - Check for spelling and grammar errors before sending</span>
           </li>
         </ul>
       </div>
-    </div>
+    </div >
   );
 };
 

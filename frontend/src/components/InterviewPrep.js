@@ -38,9 +38,12 @@ const InterviewPrep = ({ sessionId }) => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-        <p className="text-gray-600">Generating personalized interview questions...</p>
+      <div className="glass-card p-8 text-center">
+        <div className="relative w-12 h-12 mx-auto mb-4">
+          <div className="absolute inset-0 border-4 border-charcoal-600 rounded-full"></div>
+          <div className="absolute inset-0 border-4 border-amber-500 rounded-full border-t-transparent animate-spin"></div>
+        </div>
+        <p className="text-charcoal-300">Generating personalized interview questions...</p>
       </div>
     );
   }
@@ -74,37 +77,37 @@ const InterviewPrep = ({ sessionId }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+    <div className="glass-card overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-green-500 to-teal-600 text-white p-8">
-        <h2 className="text-3xl font-bold mb-2">💬 AI Interview Preparation</h2>
-        <p className="text-green-100">Personalized questions tailored to your profile and job requirements</p>
+      <div className="p-8">
+        <h2 className="text-3xl font-bold text-cream-50 mb-2">💬 AI Interview Preparation</h2>
+        <p className="text-charcoal-300">Personalized questions tailored to your profile and job requirements</p>
         <div className="mt-4 flex items-center space-x-6">
           <div className="flex items-center">
-            <span className="text-2xl font-bold mr-2">{allQuestions.length}</span>
-            <span className="text-green-100">Total Questions</span>
+            <span className="text-2xl font-bold text-amber-400 mr-2">{allQuestions.length}</span>
+            <span className="text-charcoal-400">Total Questions</span>
           </div>
           {interviewData.preparation_plan && (
             <div className="flex items-center">
-              <span className="text-2xl font-bold mr-2">
+              <span className="text-2xl font-bold text-amber-400 mr-2">
                 {interviewData.preparation_plan.total_days || 5}
               </span>
-              <span className="text-green-100">Day Plan</span>
+              <span className="text-charcoal-400">Day Plan</span>
             </div>
           )}
         </div>
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-charcoal-700">
         <div className="flex overflow-x-auto">
           {['questions', 'plan', 'tips'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${activeTab === tab
-                ? 'border-primary text-primary'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                ? 'border-amber-500 text-amber-400'
+                : 'border-transparent text-charcoal-400 hover:text-cream-100'
                 }`}
             >
               {tab === 'questions' && '❓ Practice Questions'}
@@ -120,13 +123,13 @@ const InterviewPrep = ({ sessionId }) => {
         {activeTab === 'questions' && (
           <div className="space-y-6">
             {/* Question Type Filter */}
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <div className="glass-card p-4">
               <h3 className="text-sm font-medium text-gray-700 mb-3">Filter by Type:</h3>
               <div className="flex flex-wrap gap-2">
                 {['All', 'Technical', 'Behavioral', 'System Design', 'Role-Specific'].map(type => (
                   <button
                     key={type}
-                    className="px-4 py-2 rounded-lg border-2 border-gray-300 text-sm font-medium hover:bg-primary hover:text-white hover:border-primary transition-colors"
+                    className="px-4 py-2 rounded-lg border-2 border-charcoal-700 text-sm font-medium hover:bg-amber-500 hover:text-charcoal-900 hover:border-amber-500 transition-colors"
                   >
                     {type}
                   </button>
@@ -139,12 +142,12 @@ const InterviewPrep = ({ sessionId }) => {
               {allQuestions.map((question, index) => (
                 <div
                   key={index}
-                  className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                  className="glass-card-hover rounded-xl p-6 hover:shadow-glow transition-shadow cursor-pointer"
                   onClick={() => setSelectedQuestion(selectedQuestion === index ? null : index)}
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-start flex-1">
-                      <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4 flex-shrink-0 mt-1">
+                      <div className="bg-amber-500 text-charcoal-900 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4 flex-shrink-0 mt-1">
                         {index + 1}
                       </div>
                       <div className="flex-1">
@@ -158,30 +161,30 @@ const InterviewPrep = ({ sessionId }) => {
                             </span>
                           )}
                         </div>
-                        <p className="text-gray-800 font-medium text-lg">{question.question}</p>
+                        <p className="text-cream-100 font-medium text-lg">{question.question}</p>
 
                         {selectedQuestion === index && (
                           <div className="mt-4 space-y-4">
                             {question.answer_tips && (
-                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <h5 className="text-sm font-semibold text-blue-800 mb-2 flex items-center">
+                              <div className="glass-card p-4">
+                                <h5 className="text_sm font-bold text-amber-400 mb-2 flex items-center">
                                   <span className="mr-2">💡</span>
                                   Answer Tips
                                 </h5>
-                                <p className="text-blue-700 text-sm">{question.answer_tips}</p>
+                                <p className="text-charcoal-300 text-sm">{question.answer_tips}</p>
                               </div>
                             )}
 
                             {question.key_points && question.key_points.length > 0 && (
-                              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                <h5 className="text-sm font-semibold text-green-800 mb-2 flex items-center">
+                              <div className="glass-card p-4">
+                                <h5 className="text-sm font-bold text-emerald-400 mb-2 flex items-center">
                                   <span className="mr-2">📌</span>
                                   Key Points to Cover
                                 </h5>
                                 <ul className="space-y-1">
                                   {question.key_points.map((point, i) => (
-                                    <li key={i} className="text-green-700 text-sm flex items-start">
-                                      <span className="text-green-500 mr-2">•</span>
+                                    <li key={i} className="text-charcoal-300 text-sm flex items-start">
+                                      <span className="text-emerald-400 mr-2">•</span>
                                       {point}
                                     </li>
                                   ))}
@@ -190,10 +193,10 @@ const InterviewPrep = ({ sessionId }) => {
                             )}
 
                             <div className="flex space-x-3">
-                              <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition-colors text-sm font-medium">
+                              <button className="px-4 py-2 btn-primary text-sm font-medium">
                                 🎤 Practice Answer
                               </button>
-                              <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
+                              <button className="px-4 py-2 border border-charcoal-700 text-cream-100 rounded-lg hover:bg-charcoal-800/40 transition-colors text-sm font-medium">
                                 📝 Save Question
                               </button>
                             </div>
@@ -211,18 +214,18 @@ const InterviewPrep = ({ sessionId }) => {
 
             {/* Questions to Ask */}
             {interviewData.questions_to_ask && interviewData.questions_to_ask.length > 0 && (
-              <div className="bg-purple-50 rounded-xl p-6 border-2 border-purple-200 mt-8">
-                <h3 className="text-xl font-semibold text-purple-800 mb-4 flex items-center">
+              <div className="glass-card p-6 border border-amber-500/20 mt-8">
+                <h3 className="text-xl font-bold text-cream-100 mb-4 flex items-center">
                   <span className="mr-2">🙋</span>
                   Smart Questions to Ask the Interviewer
                 </h3>
-                <p className="text-purple-700 text-sm mb-4">
+                <p className="text-charcoal-300 text-sm mb-4">
                   Asking thoughtful questions shows your genuine interest and research.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {interviewData.questions_to_ask.map((question, index) => (
-                    <div key={index} className="bg-white border border-purple-200 rounded-lg p-4">
-                      <p className="text-purple-900 text-sm font-medium">{question}</p>
+                    <div key={index} className="glass-card-hover rounded-lg p-4">
+                      <p className="text-cream-100 text-sm font-medium">{question}</p>
                     </div>
                   ))}
                 </div>
