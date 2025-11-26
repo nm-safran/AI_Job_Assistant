@@ -8,6 +8,9 @@ import JobClassification from './components/JobClassification';
 import InterviewPrep from './components/InterviewPrep';
 import SkillGapAnalysis from './components/SkillGapAnalysis';
 
+// Version marker to verify latest code is loaded
+console.log('🚀 AI Job Assistant v2.0 - 7 Tab Interface Loaded Successfully!');
+
 function App() {
   const [currentStep, setCurrentStep] = useState(1);
   const [resumeData, setResumeData] = useState(null);

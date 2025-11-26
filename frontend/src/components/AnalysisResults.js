@@ -1,3 +1,4 @@
+// v2.0 - 7 Tab Interface with AI Analysis
 import React, { useState, useEffect } from 'react';
 import AIRecommendations from './AIRecommendations';
 import AIScoreCard from './AIScoreCard';
@@ -5,10 +6,15 @@ import JobClassification from './JobClassification';
 import InterviewPrep from './InterviewPrep';
 import SkillGapAnalysis from './SkillGapAnalysis';
 
+const TABS = ['overview', 'ai-score', 'job-analysis', 'skills', 'skill-gaps', 'interview', 'recommendations'];
+
 const AnalysisResults = ({ resumeData, jobDescription, sessionId, onNext, onBack }) => {
   const [matchAnalysis, setMatchAnalysis] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+
+  // Debug: Log tabs to verify 7-tab version is loaded
+  console.log('AnalysisResults v2.0 - Available tabs:', TABS);
 
   useEffect(() => {
     if (resumeData && jobDescription && sessionId) {
@@ -114,7 +120,7 @@ const AnalysisResults = ({ resumeData, jobDescription, sessionId, onNext, onBack
       {/* Tab Navigation - PROMINENTLY STYLED */}
       <div className="border-b-2 border-gray-300 bg-gray-50">
         <div className="flex overflow-x-auto">
-          {['overview', 'ai-score', 'job-analysis', 'skills', 'skill-gaps', 'interview', 'recommendations'].map(tab => (
+          {TABS.map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
