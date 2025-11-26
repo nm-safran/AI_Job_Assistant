@@ -5,6 +5,10 @@ from advanced_parser import UniversalResumeParser
 from job_analyzer import AdvancedJobAnalyzer
 from cover_letter_generator import AdvancedCoverLetterGenerator
 from ai_recommendations import AIRecommendationEngine
+from ai_scoring_engine import AIResumeScoringEngine
+from nlp_job_classifier import NLPJobClassifier
+from ai_interview_prep import AIInterviewPrep
+from skill_gap_analyzer import SkillGapAnalyzer
 import uuid
 import json
 from datetime import datetime
@@ -20,6 +24,10 @@ resume_parser = UniversalResumeParser()
 job_analyzer = AdvancedJobAnalyzer()
 cover_generator = AdvancedCoverLetterGenerator()
 ai_engine = AIRecommendationEngine()
+scoring_engine = AIResumeScoringEngine()
+job_classifier = NLPJobClassifier()
+interview_prep = AIInterviewPrep()
+skill_gap_analyzer = SkillGapAnalyzer()
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
@@ -315,6 +323,214 @@ def get_session_history(user_id):
         return jsonify({
             'success': True,
             'sessions': [session.to_dict() for session in sessions]
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# ============== NEW AI ENDPOINTS ==============
+
+@app.route('/api/ai-score-resume', methods=['POST'])
+def ai_score_resume():
+    """AI-powered resume scoring with 5-dimensional analysis"""
+    try:
+        data = request.json
+        session_id = data.get('session_id')
+
+        if not session_id:
+            return jsonify({'error': 'Session ID is required'}), 400
+
+        # Get session data
+        session = UserSession.query.filter_by(session_id=session_id).first()
+        if not session:
+            return jsonify({'error': 'Session not found'}), 404
+
+        # Prepare resume data
+        resume_data = {
+            'text': session.resume_text,
+            'skills': json.loads(session.resume_skills) if session.resume_skills else [],
+            'experience': json.loads(session.resume_experience) if session.resume_experience else {},
+            'education': json.loads(session.resume_education) if session.resume_education else [],
+            'personal_info': json.loads(session.resume_personal_info) if session.resume_personal_info else {},
+            'sections': json.loads(session.resume_sections) if session.resume_sections else []
+        }
+
+        # Prepare job data if available
+        job_data = None
+        if session.job_description:
+            job_data = {
+                'description': session.job_description,
+                'skills': json.loads(session.job_skills) if session.job_skills else []
+            }
+
+        # Calculate comprehensive score
+        score_result = scoring_engine.calculate_comprehensive_score(resume_data, job_data)
+
+        return jsonify({
+            'success': True,
+            'score_analysis': score_result
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/classify-job', methods=['POST'])
+def classify_job():
+    """NLP-based job description classification"""
+    try:
+        data = request.json
+        job_description = data.get('job_description', '')
+        job_title = data.get('job_title', '')
+        session_id = data.get('session_id')
+
+        if not job_description:
+            return jsonify({'error': 'Job description is required'}), 400
+
+        # Classify job description
+        classification = job_classifier.classify_job_description(job_description, job_title)
+
+        # Update session if provided
+        if session_id:
+            session = UserSession.query.filter_by(session_id=session_id).first()
+            if session:
+                # Store classification in session
+                current_analysis = json.loads(session.job_analysis) if session.job_analysis else {}
+                current_analysis['classification'] = classification
+                session.job_analysis = json.dumps(current_analysis)
+                db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'classification': classification
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/generate-interview-questions', methods=['POST'])
+def generate_interview_questions():
+    """Generate AI-powered interview questions and preparation guide"""
+    try:
+        data = request.json
+        session_id = data.get('session_id')
+        job_role = data.get('job_role', '')
+        job_description = data.get('job_description', '')
+
+        if not session_id:
+            return jsonify({'error': 'Session ID is required'}), 400
+
+        # Get session data
+        session = UserSession.query.filter_by(session_id=session_id).first()
+        if not session:
+            return jsonify({'error': 'Session not found'}), 404
+
+        # Get skills from resume
+        skills = json.loads(session.resume_skills) if session.resume_skills else []
+
+        # Use job description from session if not provided
+        if not job_description and session.job_description:
+            job_description = session.job_description
+
+        # Generate interview preparation package
+        interview_package = interview_prep.generate_interview_questions(
+            job_role=job_role,
+            job_description=job_description,
+            skills=skills
+        )
+
+        return jsonify({
+            'success': True,
+            'interview_preparation': interview_package
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/analyze-skill-gaps', methods=['POST'])
+def analyze_skill_gaps():
+    """Analyze skill gaps and generate learning roadmap"""
+    try:
+        data = request.json
+        session_id = data.get('session_id')
+
+        if not session_id:
+            return jsonify({'error': 'Session ID is required'}), 400
+
+        # Get session data
+        session = UserSession.query.filter_by(session_id=session_id).first()
+        if not session:
+            return jsonify({'error': 'Session not found'}), 404
+
+        # Prepare resume data
+        resume_data = {
+            'skills': json.loads(session.resume_skills) if session.resume_skills else []
+        }
+
+        # Prepare job data
+        job_data = {
+            'description': session.job_description,
+            'skills': json.loads(session.job_skills) if session.job_skills else []
+        }
+
+        # Analyze skill gaps
+        gap_analysis = skill_gap_analyzer.analyze_skill_gaps(resume_data, job_data)
+
+        return jsonify({
+            'success': True,
+            'skill_gap_analysis': gap_analysis
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/comprehensive-analysis', methods=['POST'])
+def comprehensive_analysis():
+    """Run all AI analyses in one comprehensive endpoint"""
+    try:
+        data = request.json
+        session_id = data.get('session_id')
+        job_title = data.get('job_title', '')
+
+        if not session_id:
+            return jsonify({'error': 'Session ID is required'}), 400
+
+        # Get session data
+        session = UserSession.query.filter_by(session_id=session_id).first()
+        if not session:
+            return jsonify({'error': 'Session not found'}), 404
+
+        # Prepare data
+        resume_data = {
+            'text': session.resume_text,
+            'skills': json.loads(session.resume_skills) if session.resume_skills else [],
+            'experience': json.loads(session.resume_experience) if session.resume_experience else {},
+            'education': json.loads(session.resume_education) if session.resume_education else [],
+            'personal_info': json.loads(session.resume_personal_info) if session.resume_personal_info else {},
+            'sections': json.loads(session.resume_sections) if session.resume_sections else []
+        }
+
+        job_data = {
+            'description': session.job_description,
+            'skills': json.loads(session.job_skills) if session.job_skills else []
+        }
+
+        # Run all analyses
+        results = {
+            'ai_score': scoring_engine.calculate_comprehensive_score(resume_data, job_data),
+            'job_classification': job_classifier.classify_job_description(
+                session.job_description, job_title
+            ),
+            'interview_prep': interview_prep.generate_interview_questions(
+                job_role=job_title,
+                job_description=session.job_description,
+                skills=resume_data['skills']
+            ),
+            'skill_gaps': skill_gap_analyzer.analyze_skill_gaps(resume_data, job_data)
+        }
+
+        return jsonify({
+            'success': True,
+            'comprehensive_analysis': results
         })
 
     except Exception as e:
