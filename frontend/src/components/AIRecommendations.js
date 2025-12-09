@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import RealCoursesDisplay from './RealCoursesDisplay';
+import RealProjectsDisplay from './RealProjectsDisplay';
 
 const AIRecommendations = ({ resumeData, jobDescription, sessionId }) => {
   const [recommendations, setRecommendations] = useState(null);
@@ -123,49 +125,59 @@ const AIRecommendations = ({ resumeData, jobDescription, sessionId }) => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div>
-                      <h5 className="font-medium text-cream-100 mb-2 flex items-center">
-                        <span className="text-amber-400 mr-2">📚</span>
-                        Recommended Courses
-                      </h5>
-                      <ul className="space-y-1">
-                        {rec.courses.map((course, i) => (
-                          <li key={i} className="text-sm text-charcoal-200 flex items-start">
-                            <span className="text-charcoal-500 mr-2 mt-1">•</span>
-                            {course}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    <div className="md:col-span-3">
+                      {rec.real_courses && rec.real_courses.length > 0 ? (
+                        <RealCoursesDisplay courses={rec.real_courses} skill={rec.skill} />
+                      ) : (
+                        <div className="mb-4">
+                          <h5 className="font-medium text-cream-100 mb-2 flex items-center">
+                            <span className="text-amber-400 mr-2">📚</span>
+                            Recommended Courses
+                          </h5>
+                          <ul className="space-y-1">
+                            {rec.courses.map((course, i) => (
+                              <li key={i} className="text-sm text-charcoal-200 flex items-start">
+                                <span className="text-charcoal-500 mr-2 mt-1">•</span>
+                                {course}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
 
-                    <div>
-                      <h5 className="font-medium text-cream-100 mb-2 flex items-center">
-                        <span className="text-emerald-400 mr-2">💼</span>
-                        Practice Projects
-                      </h5>
-                      <ul className="space-y-1">
-                        {rec.projects.map((project, i) => (
-                          <li key={i} className="text-sm text-charcoal-200 flex items-start">
-                            <span className="text-charcoal-500 mr-2 mt-1">•</span>
-                            {project}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                      {rec.real_projects && rec.real_projects.length > 0 ? (
+                        <RealProjectsDisplay projects={rec.real_projects} skill={rec.skill} />
+                      ) : (
+                        <div className="mb-4">
+                          <h5 className="font-medium text-cream-100 mb-2 flex items-center">
+                            <span className="text-emerald-400 mr-2">💼</span>
+                            Practice Projects
+                          </h5>
+                          <ul className="space-y-1">
+                            {rec.projects.map((project, i) => (
+                              <li key={i} className="text-sm text-charcoal-200 flex items-start">
+                                <span className="text-charcoal-500 mr-2 mt-1">•</span>
+                                {project}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
 
-                    <div>
-                      <h5 className="font-medium text-cream-100 mb-2 flex items-center">
-                        <span className="text-amber-400 mr-2">🎯</span>
-                        Practice Areas
-                      </h5>
-                      <ul className="space-y-1">
-                        {rec.practice.map((practice, i) => (
-                          <li key={i} className="text-sm text-charcoal-200 flex items-start">
-                            <span className="text-charcoal-500 mr-2 mt-1">•</span>
-                            {practice}
-                          </li>
-                        ))}
-                      </ul>
+                      <div className="mt-4">
+                        <h5 className="font-medium text-cream-100 mb-2 flex items-center">
+                          <span className="text-amber-400 mr-2">🎯</span>
+                          Practice Areas
+                        </h5>
+                        <ul className="space-y-1">
+                          {rec.practice.map((practice, i) => (
+                            <li key={i} className="text-sm text-charcoal-200 flex items-start">
+                              <span className="text-charcoal-500 mr-2 mt-1">•</span>
+                              {practice}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
                   </div>
 

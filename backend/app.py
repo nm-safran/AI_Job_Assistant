@@ -238,7 +238,9 @@ def analyze_match():
                     'courses': courses_list[:4],
                     'projects': projects_list[:3],
                     'practice': practice_list[:4],
-                    'timeline': f"{path.get('learning_stages', {}).get('beginner', {}).get('time_needed', '4 weeks')}"
+                    'timeline': f"{path.get('learning_stages', {}).get('beginner', {}).get('time_needed', '4 weeks')}",
+                    'real_courses': path.get('real_courses', []),
+                    'real_projects': path.get('real_projects', [])
                 })
         else:
              # Fallback if no gaps found or data issue
