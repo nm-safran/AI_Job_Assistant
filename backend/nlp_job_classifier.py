@@ -8,8 +8,19 @@ import re
 from collections import Counter
 
 
+import spacy
+from spacy.matcher import PhraseMatcher
+
 class NLPJobClassifier:
     def __init__(self):
+        try:
+            self.nlp = spacy.load("en_core_web_sm")
+        except:
+            # Fallback if model not found, though start.bat ensures it's there
+            import subprocess
+            subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
+            self.nlp = spacy.load("en_core_web_sm")
+
         # Industry classification keywords
         self.industry_keywords = {
             'Technology/Software': [
@@ -105,21 +116,21 @@ class NLPJobClassifier:
         """
         Comprehensive NLP-based job description classification
         """
-        text = job_description.lower()
-        title_lower = job_title.lower()
+        text = job_description
+        doc = self.nlp(text)
 
         # 1. Industry Classification
-        industry_scores = self._classify_industry(text, title_lower)
+        industry_scores = self._classify_industry(text.lower(), job_title.lower())
         primary_industry = max(industry_scores.items(), key=lambda x: x[1])[0] if industry_scores else 'General'
 
         # 2. Job Level Detection
-        job_level = self._detect_job_level(text, title_lower)
+        job_level = self._detect_job_level(text.lower(), job_title.lower())
 
-        # 3. Extract Requirements
-        requirements = self._extract_requirements(job_description)
+        # 3. Extract Requirements using spaCy
+        requirements = self._extract_requirements_nlp(doc)
 
-        # 4. Identify Key Skills
-        key_skills = self._identify_key_skills(text)
+        # 4. Identify Key Skills (Advanced extraction)
+        key_skills = self._identify_key_skills_nlp(doc)
 
         # 5. Analyze Job Complexity
         complexity = self._analyze_complexity(requirements, key_skills)
@@ -128,10 +139,10 @@ class NLPJobClassifier:
         must_have, nice_to_have = self._categorize_requirements(job_description)
 
         # 7. Detect Work Arrangement
-        work_arrangement = self._detect_work_arrangement(text)
+        work_arrangement = self._detect_work_arrangement(text.lower())
 
         # 8. Sentiment Analysis
-        sentiment = self._analyze_sentiment(text)
+        sentiment = self._analyze_sentiment(text.lower())
 
         # 9. Compensation Indicators
         compensation_info = self._extract_compensation_info(text)
@@ -189,8 +200,8 @@ class NLPJobClassifier:
 
         return max(level_scores.items(), key=lambda x: x[1])[0]
 
-    def _extract_requirements(self, job_description: str) -> Dict[str, List[str]]:
-        """Extract different types of requirements"""
+    def _extract_requirements_nlp(self, doc) -> Dict[str, List[str]]:
+        """Advanced requirement extraction using spaCy dependency parsing"""
         requirements = {
             'technical_skills': [],
             'soft_skills': [],
@@ -199,73 +210,71 @@ class NLPJobClassifier:
             'certifications': []
         }
 
-        text_lower = job_description.lower()
+        # Analyze sentences for requirements
+        for sent in doc.sents:
+            sent_text = sent.text.lower()
 
-        # Extract technical skills
-        tech_patterns = [
-            r'(?:experience with|proficiency in|knowledge of)\s+([^.;]+)',
-            r'(?:skills?:)\s*([^.;]+)',
-            r'(?:required|must have):?\s*([^.;]+)'
-        ]
-        for pattern in tech_patterns:
-            matches = re.findall(pattern, text_lower)
-            for match in matches:
-                items = [item.strip() for item in re.split(r'[,;]', match) if len(item.strip()) > 2]
-                requirements['technical_skills'].extend(items[:5])  # Limit to avoid noise
+            # Technical Skills: Look for direct objects of "use", "know", "experience with"
+            if any(w in sent_text for w in ['experience with', 'knowledge of', 'proficiency in', 'using']):
+                # Extract proper nouns and noun chunks as potential skills
+                for chunk in sent.noun_chunks:
+                    if chunk.root.pos_ in ['NOUN', 'PROPN'] and len(chunk.text) > 2:
+                        # Filter simple English words (heuristic)
+                        if chunk.root.dep_ in ['dobj', 'pobj', 'conj']:
+                             requirements['technical_skills'].append(chunk.text.strip())
 
-        # Extract education requirements
-        education_patterns = [
-            r'(bachelor[\'s]*|master[\'s]*|phd|mba|degree)\s+(?:in\s+)?([^.;]+)',
-            r'([^.;]*(?:degree|certification)[^.;]*)'
-        ]
-        for pattern in education_patterns:
-            matches = re.findall(pattern, text_lower)
-            for match in matches:
-                edu_text = ' '.join(match) if isinstance(match, tuple) else match
-                if 5 < len(edu_text) < 100:
-                    requirements['education'].append(edu_text.strip())
+            # Education: Look for degree keywords
+            if any(w in sent_text for w in ['degree', 'bachelor', 'master', 'phd', 'mba']):
+                 for chunk in sent.noun_chunks:
+                     if any(d in chunk.text.lower() for d in ['degree', 'science', 'arts', 'engineering']):
+                         requirements['education'].append(chunk.text.strip())
 
-        # Extract experience requirements
-        exp_patterns = [
-            r'(\d+[\+]?\s*(?:years?|yrs?)(?:\s+of)?\s+(?:experience|work)[^.;]*)',
-            r'(proven (?:track record|experience)[^.;]*)'
-        ]
-        for pattern in exp_patterns:
-            matches = re.findall(pattern, text_lower)
-            requirements['experience'].extend([m.strip() for m in matches[:3]])
+            # Experience: Look for time entities
+            for ent in sent.ents:
+                if ent.label_ == 'DATE' and 'year' in ent.text.lower():
+                     requirements['experience'].append(ent.text.strip() + " experience")
 
-        # Extract certifications
-        cert_keywords = ['certification', 'certified', 'license', 'accreditation']
-        for keyword in cert_keywords:
-            pattern = f'([^.;]*{keyword}[^.;]*)'
-            matches = re.findall(pattern, text_lower)
-            requirements['certifications'].extend([m.strip() for m in matches[:3]])
+            # Certifications
+            if 'certification' in sent_text or 'license' in sent_text:
+                 requirements['certifications'].append(sent.text.strip())
 
-        # Clean up and deduplicate
+        # Deduplicate and clean
         for key in requirements:
-            requirements[key] = list(set(requirements[key]))[:5]  # Max 5 per category
+            requirements[key] = list(set(requirements[key]))[:6]
 
         return requirements
 
-    def _identify_key_skills(self, text: str) -> List[str]:
-        """Identify most important skills from job description"""
-        # Common professional skills
+    def _identify_key_skills_nlp(self, doc) -> List[str]:
+        """Identify most important skills using spaCy NER and pattern matching"""
+        found_skills = []
+
+        # 1. Use Named Entity Recognition for specific product/org names
+        for ent in doc.ents:
+             if ent.label_ in ['ORG', 'PRODUCT', 'WORK_OF_ART'] and len(ent.text) > 2:
+                 # Check against a small denial list to remove common false positives
+                 denial_list = ['google', 'microsoft', 'apple', 'amazon', 'adobe', 'inc', 'llc', 'corp']
+                 if ent.text.lower() not in denial_list:
+                    found_skills.append(ent.text)
+
+        # 2. Use common keyword matching for standard skills (fallback)
         skill_keywords = [
             'python', 'java', 'javascript', 'react', 'angular', 'node.js', 'sql', 'aws',
             'docker', 'kubernetes', 'git', 'agile', 'scrum', 'leadership', 'communication',
             'problem solving', 'analytical', 'project management', 'data analysis',
-            'machine learning', 'api', 'rest', 'microservices', 'ci/cd', 'devops'
+            'machine learning', 'api', 'rest', 'microservices', 'ci/cd', 'devops',
+            'html', 'css', 'typescript', 'vue', 'django', 'flask', 'spring', 'go', 'ruby'
         ]
 
-        found_skills = []
+        text_lower = doc.text.lower()
         for skill in skill_keywords:
-            if skill in text:
-                count = text.count(skill)
-                found_skills.append((skill, count))
+            if skill in text_lower:
+                found_skills.append(skill)
 
-        # Sort by frequency and return top skills
-        found_skills.sort(key=lambda x: x[1], reverse=True)
-        return [skill for skill, _ in found_skills[:10]]
+        # Count frequency using Counter
+        skill_counts = Counter(found_skills)
+
+        # Return unique skills sorted by frequency
+        return [skill for skill, count in skill_counts.most_common(12)]
 
     def _analyze_complexity(self, requirements: Dict[str, List[str]],
                            skills: List[str]) -> Dict[str, Any]:

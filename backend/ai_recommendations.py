@@ -184,15 +184,25 @@ class AIRecommendationEngine:
 
     def get_missing_sections_suggestions(self, existing_sections):
         all_sections = ['Experience', 'Education', 'Skills', 'Projects', 'Certifications', 'Summary']
-        missing_sections = [section for section in all_sections if section not in existing_sections]
+        # Convert existing sections to lower case for comparison
+        existing_lower = [s.lower() for s in existing_sections]
 
         suggestions = []
-        for section in missing_sections:
-            if section == 'Summary':
-                suggestions.append("Add a professional summary to highlight your key achievements")
-            elif section == 'Projects':
-                suggestions.append("Include a projects section to showcase your practical experience")
-            elif section == 'Certifications':
-                suggestions.append("Add certifications to demonstrate specialized knowledge")
+
+        if 'summary' not in existing_lower and 'professional summary' not in existing_lower:
+            suggestions.append("Add a 'Professional Summary' to highlight your key achievements and career goals immediately.")
+
+        if 'projects' not in existing_lower:
+             # Heuristic: If it's a tech resume (implied), projects are crucial
+            suggestions.append("Include a 'Projects' section. For technical roles, this is often as important as experience to demonstrate practical skills.")
+
+        if 'certifications' not in existing_lower:
+            suggestions.append("Add 'Certifications' if you have any relevant ones (e.g. AWS, Azure, Google). If not, consider earning one to stand out.")
+
+        if 'skills' not in existing_lower and 'technical skills' not in existing_lower:
+            suggestions.append("Crucial: Your resume is missing a dedicated 'Skills' section. This is vital for ATS parsers.")
+
+        if 'experience' not in existing_lower and 'work experience' not in existing_lower:
+             suggestions.append("Ensure you have a clear 'Experience' section. If you are a fresh graduate, use 'Internships' or 'Academic Projects'.")
 
         return suggestions

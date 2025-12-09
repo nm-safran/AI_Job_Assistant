@@ -185,12 +185,7 @@ const AIRecommendations = ({ resumeData, jobDescription, sessionId }) => {
                     <span className="text-sm text-charcoal-400">
                       Timeline: <strong>{rec.timeline}</strong>
                     </span>
-                    <button
-                      onClick={() => alert(`Learning resources for ${rec.skill} would open here`)}
-                      className="btn-ghost text-sm font-medium"
-                    >
-                      View Detailed Resources →
-                    </button>
+
                   </div>
                 </div>
               ))}
