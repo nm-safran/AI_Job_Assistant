@@ -69,8 +69,7 @@ const AIRecommendations = ({ resumeData, jobDescription, sessionId }) => {
       <div className="flex border-b border-charcoal-700">
         {[
           { key: 'skills', name: 'Skill Development', icon: '🛠️' },
-          { key: 'plan', name: 'Learning Plan', icon: '📅' },
-          { key: 'interview', name: 'Interview Prep', icon: '💬' }
+          { key: 'plan', name: 'Learning Plan', icon: '📅' }
         ].map(tab => (
           <button
             key={tab.key}
@@ -263,85 +262,7 @@ const AIRecommendations = ({ resumeData, jobDescription, sessionId }) => {
         </div>
       )}
 
-      {/* Interview Preparation Tab */}
-      {activeTab === 'interview' && (
-        <div className="space-y-6">
-          <div className="glass-card p-6">
-            <h3 className="text-xl font-bold text-cream-100 mb-2">
-              💬 Personalized Interview Preparation
-            </h3>
-            <p className="text-charcoal-300">
-              Practice these questions tailored to your skills and the job requirements
-            </p>
-          </div>
 
-          {interview_questions && interview_questions.length > 0 ? (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h4 className="font-bold text-cream-100 text-lg">
-                  Practice Questions ({interview_questions.length})
-                </h4>
-                <span className="text-sm text-charcoal-400">
-                  Based on your profile and job requirements
-                </span>
-              </div>
-
-              {interview_questions.map((question, index) => (
-                <div key={index} className="glass-card-hover p-6 rounded-xl">
-                  <div className="flex items-start">
-                    <div className="bg-amber-500 text-charcoal-900 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4 flex-shrink-0">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-cream-100 mb-3">{question}</p>
-                      <div className="flex space-x-3">
-                        <button
-                          onClick={() => alert('Practice answering this question')}
-                          className="btn-ghost text-sm font-medium"
-                        >
-                          💬 Practice Answer
-                        </button>
-                        <button
-                          onClick={() => alert('View tips for this question')}
-                          className="text-charcoal-400 hover:text-cream-100 text-sm font_medium"
-                        >
-                          💡 Answer Tips
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <p>No interview questions generated for this analysis.</p>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="glass-card p-4 rounded-lg">
-              <h5 className="font-semibold text-green-800 mb-2 flex items-center">
-                <span className="mr-2">⭐</span>
-                STAR Method Tip
-              </h5>
-              <p className="text-charcoal-300 text-sm">
-                Structure your answers using Situation, Task, Action, Result to provide comprehensive responses.
-              </p>
-            </div>
-
-            <div className="glass-card p-4 rounded-lg">
-              <h5 className="font-semibold text-blue-800 mb-2 flex items-center">
-                <span className="mr-2">🎯</span>
-                Preparation Strategy
-              </h5>
-              <p className="text-charcoal-300 text-sm">
-                Practice answering 3-5 questions daily and record yourself to improve delivery.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -165,7 +165,7 @@ const InterviewPrep = ({ sessionId }) => {
       {/* Tab Navigation */}
       <div className="border-b border-charcoal-700">
         <div className="flex overflow-x-auto">
-          {['questions', 'plan', 'tips'].map(tab => (
+          {['questions', 'tips'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -175,7 +175,6 @@ const InterviewPrep = ({ sessionId }) => {
                 }`}
             >
               {tab === 'questions' && '❓ Practice Questions'}
-              {tab === 'plan' && '📅 Study Plan'}
               {tab === 'tips' && '💡 Interview Tips'}
             </button>
           ))}
@@ -291,7 +290,7 @@ const InterviewPrep = ({ sessionId }) => {
                                     <div className="flex items-center justify-between bg-charcoal-800/50 p-3 rounded-lg">
                                       <span className="text-charcoal-300 text-sm">AI Score</span>
                                       <span className={`text-lg font-bold ${question.feedback.score >= 90 ? 'text-emerald-400' :
-                                          question.feedback.score >= 70 ? 'text-amber-400' : 'text-red-400'
+                                        question.feedback.score >= 70 ? 'text-amber-400' : 'text-red-400'
                                         }`}>
                                         {question.feedback.score}/100
                                       </span>
@@ -383,70 +382,7 @@ const InterviewPrep = ({ sessionId }) => {
           </div>
         )}
 
-        {/* Preparation Plan Tab */}
-        {activeTab === 'plan' && interviewData.preparation_plan && (
-          <div className="space-y-6">
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
-              <h3 className="text-2xl font-bold text-blue-900 mb-2">
-                {interviewData.preparation_plan.total_days}-Day Interview Prep Plan
-              </h3>
-              <p className="text-blue-700">
-                Follow this structured plan to maximize your interview readiness
-              </p>
-            </div>
 
-            {interviewData.preparation_plan.daily_schedule &&
-              interviewData.preparation_plan.daily_schedule.map((day, index) => (
-                <div key={index} className="border-2 border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow">
-                  <div className="flex items-start">
-                    <div className="bg-primary text-white rounded-full w-12 h-12 flex items-center justify-center text-lg font-bold mr-4 flex-shrink-0">
-                      {day.day}
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="text-lg font-bold text-gray-800 mb-2">{day.focus}</h4>
-                      {day.activities && (
-                        <ul className="space-y-2 mb-3">
-                          {day.activities.map((activity, i) => (
-                            <li key={i} className="text-gray-700 text-sm flex items-start">
-                              <span className="text-primary mr-2 mt-1">●</span>
-                              {activity}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                      {day.topics && day.topics.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          {day.topics.map((topic, i) => (
-                            <span key={i} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">
-                              {topic}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-            {interviewData.preparation_plan.resources &&
-              interviewData.preparation_plan.resources.length > 0 && (
-                <div className="bg-yellow-50 rounded-xl p-6 border border-yellow-200">
-                  <h4 className="font-semibold text-yellow-800 mb-3 flex items-center">
-                    <span className="mr-2">📚</span>
-                    Recommended Resources
-                  </h4>
-                  <ul className="space-y-2">
-                    {interviewData.preparation_plan.resources.map((resource, index) => (
-                      <li key={index} className="text-yellow-700 text-sm flex items-start">
-                        <span className="text-yellow-500 mr-2 mt-1">•</span>
-                        {resource}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-          </div>
-        )}
 
         {/* Tips Tab */}
         {activeTab === 'tips' && (
