@@ -7,11 +7,29 @@ const InterviewPrep = ({ sessionId }) => {
   const [activeTab, setActiveTab] = useState('questions');
   const [selectedQuestion, setSelectedQuestion] = useState(null);
 
+  // New state for practice mode
+  const [questionsWithState, setQuestionsWithState] = useState([]);
+  const [answerInput, setAnswerInput] = useState('');
+  const [isGettingFeedback, setIsGettingFeedback] = useState(false);
+
   useEffect(() => {
     if (sessionId) {
       fetchInterviewQuestions();
     }
   }, [sessionId]);
+
+  // Update questionsWithState when interviewData changes
+  useEffect(() => {
+    if (interviewData) {
+      const allQuestions = [
+        ...(interviewData.technical_questions || []).map(q => ({ ...q, type: 'Technical' })),
+        ...(interviewData.behavioral_questions || []).map(q => ({ ...q, type: 'Behavioral' })),
+        ...(interviewData.system_design_questions || []).map(q => ({ ...q, type: 'System Design' })),
+        ...(interviewData.role_specific_questions || []).map(q => ({ ...q, type: 'Role-Specific' }))
+      ];
+      setQuestionsWithState(allQuestions);
+    }
+  }, [interviewData]);
 
   const fetchInterviewQuestions = async () => {
     setLoading(true);
@@ -37,6 +55,55 @@ const InterviewPrep = ({ sessionId }) => {
     }
   };
 
+  const handleGetFeedback = async (question, index) => {
+    setIsGettingFeedback(true);
+    try {
+      const response = await fetch('http://localhost:5000/api/get-interview-answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: question.question,
+          user_answer: answerInput
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        const newQuestions = [...questionsWithState];
+        newQuestions[index].feedback = data.result;
+        setQuestionsWithState(newQuestions);
+      }
+    } catch (error) {
+      console.error("Error getting feedback:", error);
+    } finally {
+      setIsGettingFeedback(false);
+    }
+  };
+
+  const handleGetSampleAnswer = async (question, index) => {
+    setIsGettingFeedback(true);
+    try {
+      const response = await fetch('http://localhost:5000/api/get-interview-answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: question.question
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        const newQuestions = [...questionsWithState];
+        newQuestions[index].feedback = data.result;
+        setQuestionsWithState(newQuestions);
+      }
+    } catch (error) {
+      console.error("Error getting sample answer:", error);
+    } finally {
+      setIsGettingFeedback(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="glass-card p-8 text-center">
@@ -57,12 +124,8 @@ const InterviewPrep = ({ sessionId }) => {
     );
   }
 
-  const allQuestions = [
-    ...(interviewData.technical_questions || []).map(q => ({ ...q, type: 'Technical' })),
-    ...(interviewData.behavioral_questions || []).map(q => ({ ...q, type: 'Behavioral' })),
-    ...(interviewData.system_design_questions || []).map(q => ({ ...q, type: 'System Design' })),
-    ...(interviewData.role_specific_questions || []).map(q => ({ ...q, type: 'Role-Specific' }))
-  ];
+  // Use questionsWithState instead of re-deriving allQuestions
+  const allQuestions = questionsWithState;
 
   const getTypeColor = (type) => {
     if (type === 'Technical') return 'bg-blue-100 text-blue-800 border-blue-300';
@@ -165,41 +228,116 @@ const InterviewPrep = ({ sessionId }) => {
                         <p className="text-cream-100 font-medium text-lg">{question.question}</p>
 
                         {selectedQuestion === index && (
-                          <div className="mt-4 space-y-4">
-                            {question.answer_tips && (
-                              <div className="glass-card p-4">
-                                <h5 className="text_sm font-bold text-amber-400 mb-2 flex items-center">
-                                  <span className="mr-2">💡</span>
-                                  Answer Tips
-                                </h5>
-                                <p className="text-charcoal-300 text-sm">{question.answer_tips}</p>
-                              </div>
-                            )}
+                          <div
+                            className="mt-4 space-y-4 cursor-default"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {/* Practice Mode UI */}
+                            <div className="glass-card p-4 border border-amber-500/30">
+                              <h5 className="text-sm font-bold text-amber-400 mb-3 flex items-center">
+                                <span className="mr-2">🎤</span>
+                                Practice Your Answer
+                              </h5>
 
-                            {question.key_points && question.key_points.length > 0 && (
-                              <div className="glass-card p-4">
-                                <h5 className="text-sm font-bold text-emerald-400 mb-2 flex items-center">
-                                  <span className="mr-2">📌</span>
-                                  Key Points to Cover
-                                </h5>
-                                <ul className="space-y-1">
-                                  {question.key_points.map((point, i) => (
-                                    <li key={i} className="text-charcoal-300 text-sm flex items-start">
-                                      <span className="text-emerald-400 mr-2">•</span>
-                                      {point}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
+                              {!question.feedback ? (
+                                <div className="space-y-3">
+                                  <textarea
+                                    className="w-full bg-charcoal-800/50 border border-charcoal-600 rounded-lg p-3 text-cream-100 text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all"
+                                    rows="4"
+                                    placeholder="Type your answer here to get AI feedback..."
+                                    value={question.userAnswer || ''}
+                                    onChange={(e) => {
+                                      const newQuestions = [...questionsWithState];
+                                      newQuestions[index].userAnswer = e.target.value;
+                                      setQuestionsWithState(newQuestions);
+                                      setAnswerInput(e.target.value);
+                                    }}
+                                    onClick={(e) => e.stopPropagation()}
+                                  ></textarea>
 
-                            <div className="flex space-x-3">
-                              <button className="px-4 py-2 btn-primary text-sm font-medium">
-                                🎤 Practice Answer
-                              </button>
-                              <button className="px-4 py-2 border border-charcoal-700 text-cream-100 rounded-lg hover:bg-charcoal-800/40 transition-colors text-sm font-medium">
-                                📝 Save Question
-                              </button>
+                                  <div className="flex space-x-3">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleGetFeedback(question, index);
+                                      }}
+                                      disabled={isGettingFeedback || !question.userAnswer}
+                                      className={`px-4 py-2 btn-primary text-sm font-medium flex items-center ${(!question.userAnswer) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                      {isGettingFeedback ? (
+                                        <>
+                                          <span className="animate-spin mr-2">⟳</span> Analyzing...
+                                        </>
+                                      ) : (
+                                        <>
+                                          ✨ Get AI Feedback
+                                        </>
+                                      )}
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleGetSampleAnswer(question, index);
+                                      }}
+                                      className="px-4 py-2 border border-charcoal-700 text-cream-100 rounded-lg hover:bg-charcoal-800/40 transition-colors text-sm font-medium"
+                                    >
+                                      👀 See Sample Answer
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="space-y-4 animate-fade-in">
+                                  {question.feedback.score && (
+                                    <div className="flex items-center justify-between bg-charcoal-800/50 p-3 rounded-lg">
+                                      <span className="text-charcoal-300 text-sm">AI Score</span>
+                                      <span className={`text-lg font-bold ${question.feedback.score >= 90 ? 'text-emerald-400' :
+                                          question.feedback.score >= 70 ? 'text-amber-400' : 'text-red-400'
+                                        }`}>
+                                        {question.feedback.score}/100
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  {question.feedback.strengths && (
+                                    <div>
+                                      <h6 className="text-xs font-bold text-emerald-400 mb-1">Strengths</h6>
+                                      <ul className="list-disc list-inside text-xs text-charcoal-300">
+                                        {question.feedback.strengths.map((s, i) => <li key={i}>{s}</li>)}
+                                      </ul>
+                                    </div>
+                                  )}
+
+                                  {question.feedback.improvements && (
+                                    <div>
+                                      <h6 className="text-xs font-bold text-amber-400 mb-1">Improvements</h6>
+                                      <ul className="list-disc list-inside text-xs text-charcoal-300">
+                                        {question.feedback.improvements.map((s, i) => <li key={i}>{s}</li>)}
+                                      </ul>
+                                    </div>
+                                  )}
+
+                                  {question.feedback.sample_answer && (
+                                    <div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-lg">
+                                      <h6 className="text-xs font-bold text-blue-400 mb-1">Sample Answer Strategy</h6>
+                                      <p className="text-xs text-charcoal-200 leading-relaxed whitespace-pre-wrap">
+                                        {question.feedback.sample_answer}
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const newQuestions = [...questionsWithState];
+                                      newQuestions[index].feedback = null;
+                                      setQuestionsWithState(newQuestions);
+                                    }}
+                                    className="text-xs text-charcoal-400 hover:text-amber-400 underline"
+                                  >
+                                    Try Again
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}

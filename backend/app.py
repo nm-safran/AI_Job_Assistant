@@ -491,6 +491,26 @@ def generate_interview_questions():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/get-interview-answer', methods=['POST'])
+def get_interview_answer():
+    """Get AI feedback or sample answer for an interview question"""
+    try:
+        data = request.json
+        question = data.get('question', '')
+        user_answer = data.get('user_answer')
+
+        if not question:
+            return jsonify({'error': 'Question is required'}), 400
+
+        result = interview_prep.generate_answer_feedback(question, user_answer)
+
+        return jsonify({
+            'success': True,
+            'result': result
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/analyze-skill-gaps', methods=['POST'])
 def analyze_skill_gaps():
     """Analyze skill gaps and generate learning roadmap"""

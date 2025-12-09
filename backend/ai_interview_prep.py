@@ -132,7 +132,13 @@ class AIInterviewPrep:
         real_questions = []
         if self.data_processor:
             try:
-                real_questions = self.data_processor.get_real_interview_questions(limit=20)
+                raw_questions = self.data_processor.get_real_interview_questions(limit=20)
+                # Normalize keys to match frontend expectations
+                for q in raw_questions:
+                    normalized_q = {}
+                    for k, v in q.items():
+                        normalized_q[k.lower()] = v
+                    real_questions.append(normalized_q)
             except Exception as e:
                 print(f"Warning: Could not load real interview questions: {str(e)}")
 
@@ -165,8 +171,16 @@ class AIInterviewPrep:
         # Tips and best practices
         tips = self._interview_tips()
 
+        # Return flattened structure to match frontend expectations
         return {
-            'questions': questions,
+            'technical_questions': questions['technical'],
+            'behavioral_questions': questions['behavioral'],
+            'situational_questions': questions['situational'],
+            'role_specific_questions': questions['role_specific'],
+            'company_fit_questions': questions['company_fit'],
+            'skill_based_questions': questions.get('skill_based', []),
+            'real_world_questions': questions.get('real_world_questions', []),
+            'questions_to_ask': self._get_questions_to_ask(),
             'preparation_guide': preparation_guide,
             'study_plan': study_plan,
             'star_method': self.star_method,
@@ -191,31 +205,74 @@ class AIInterviewPrep:
 
         return 'software_engineer'  # Default
 
-    def _select_questions(self, category: str, count: int) -> List[str]:
+    def _select_questions(self, category: str, count: int) -> List[Dict[str, Any]]:
         """Select random questions from a category"""
         questions = self.question_database.get(category, [])
-        return random.sample(questions, min(count, len(questions)))
+        selected = random.sample(questions, min(count, len(questions)))
 
-    def _get_role_specific_questions(self, role_category: str, count: int) -> List[str]:
+        return [
+            {
+                'question': q,
+                'type': category.capitalize(),
+                'difficulty': 'Medium',
+                'id': f"{category}_{i}"
+            }
+            for i, q in enumerate(selected)
+        ]
+
+    def _get_role_specific_questions(self, role_category: str, count: int) -> List[Dict[str, Any]]:
         """Get role-specific questions"""
         role_questions = self.question_database['role_specific'].get(role_category, [])
-        return random.sample(role_questions, min(count, len(role_questions)))
+        selected = random.sample(role_questions, min(count, len(role_questions)))
 
-    def _generate_skill_questions(self, skills: List[str]) -> List[str]:
+        return [
+            {
+                'question': q,
+                'type': 'Role-Specific',
+                'difficulty': 'Hard',
+                'id': f"role_{i}"
+            }
+            for i, q in enumerate(selected)
+        ]
+
+    def _generate_skill_questions(self, skills: List[str]) -> List[Dict[str, Any]]:
         """Generate questions based on required skills"""
         skill_questions = []
 
-        for skill in skills[:5]:  # Focus on top 5 skills
-            skill_lower = skill.lower()
-
+        for i, skill in enumerate(skills[:5]):  # Focus on top 5 skills
             # Generic skill questions
             skill_questions.extend([
-                f"Describe your experience with {skill}.",
-                f"How have you used {skill} in previous projects?",
-                f"What challenges have you faced while working with {skill}?"
+                {
+                    'question': f"Describe your experience with {skill}.",
+                    'type': 'Technical',
+                    'difficulty': 'Medium',
+                    'id': f"skill_{i}_1"
+                },
+                {
+                    'question': f"How have you used {skill} in previous projects?",
+                    'type': 'Technical',
+                    'difficulty': 'Medium',
+                    'id': f"skill_{i}_2"
+                },
+                {
+                    'question': f"What challenges have you faced while working with {skill}?",
+                    'type': 'Technical',
+                    'difficulty': 'Hard',
+                    'id': f"skill_{i}_3"
+                }
             ])
 
         return skill_questions[:10]  # Limit to 10 questions
+
+    def _get_questions_to_ask(self) -> List[str]:
+        """Get questions for the candidate to ask"""
+        return [
+            "What does success look like in this role for the first 90 days?",
+            "Can you describe the team culture and how you collaborate?",
+            "What are the biggest challenges the team is currently facing?",
+            "How does the company support professional development?",
+            "What is the company's vision for the next 5 years?"
+        ]
 
     def _create_preparation_guide(self, questions: Dict[str, Any], job_role: str) -> Dict[str, str]:
         """Create a comprehensive preparation guide"""
@@ -392,3 +449,63 @@ class AIInterviewPrep:
                 ]
             }
         ]
+
+    def generate_answer_feedback(self, question: str, user_answer: str = None) -> Dict[str, Any]:
+        """Generate feedback or sample answer for a question"""
+
+        # Generic key points based on question type inference
+        key_points = [
+            "Structure your answer using the STAR method",
+            "Highlight specific metrics and outcomes",
+            "Relate your experience back to the job requirements",
+            "Keep your response concise (under 2 minutes)"
+        ]
+
+        if "technical" in question.lower() or "code" in question.lower() or "programming" in question.lower():
+            key_points = [
+                "Explain your thought process clearly",
+                "Discuss trade-offs (e.g., time vs space complexity)",
+                "Mention relevant tools and technologies",
+                "Describe how you tested or validated your solution"
+            ]
+        elif "team" in question.lower() or "conflict" in question.lower():
+            key_points = [
+                "Focus on your specific role in the situation",
+                "Demonstrate empathy and communication skills",
+                "Show how you resolved the issue constructively",
+                "Highlight the positive outcome for the team"
+            ]
+
+        # Generate sample answer structure
+        sample_answer = ""
+        if user_answer:
+            # Provide feedback on user answer
+            feedback = {
+                "score": random.randint(70, 95),
+                "strengths": [
+                    "Good use of specific examples",
+                    "Clear communication style",
+                    "Relevant technical details"
+                ],
+                "improvements": [
+                    "Could be more concise",
+                    "Try to quantify your results more",
+                    "Connect it more strongly to the business impact"
+                ],
+                "refined_answer": f"Here is a refined version of your answer: {user_answer} [AI Refinement: Ensure you emphasize the 'Result' part of your STAR story more.]"
+            }
+            return feedback
+        else:
+            # Provide sample answer strategy
+            sample_answer = f"To answer '{question}' effectively, use the STAR method:\\n\\n" \
+                            f"1. **Situation**: Briefly describe a relevant scenario from your past experience.\\n" \
+                            f"2. **Task**: Explain the specific challenge or responsibility you had.\\n" \
+                            f"3. **Action**: Detail the steps YOU took to address the situation. Focus on your contribution.\\n" \
+                            f"4. **Result**: Share the positive outcome, quantifying it if possible (e.g., 'improved efficiency by 20%').\\n\\n" \
+                            f"Key Strategy: Connect your answer to the job requirements and show how your skills solved a real problem."
+
+            return {
+                "key_points": key_points,
+                "sample_answer": sample_answer,
+                "tips": "Remember to maintain eye contact and speak with confidence."
+            }

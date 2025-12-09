@@ -255,7 +255,7 @@ const AnalysisResults = ({ resumeData, jobDescription, sessionId, onNext, onBack
           )}
 
           {activeTab === 'job-analysis' && (
-            <JobClassification sessionId={sessionId} />
+            <JobClassification sessionId={sessionId} jobDescription={jobDescription} />
           )}
 
           {activeTab === 'skill-gaps' && (
@@ -263,7 +263,7 @@ const AnalysisResults = ({ resumeData, jobDescription, sessionId, onNext, onBack
           )}
 
           {activeTab === 'interview' && (
-            <InterviewPrep sessionId={sessionId} />
+            <InterviewPrep sessionId={sessionId} jobDescription={jobDescription} />
           )}
 
           {activeTab === 'recommendations' && (

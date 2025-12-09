@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const JobClassification = ({ sessionId }) => {
+const JobClassification = ({ sessionId, jobDescription }) => {
   const [classification, setClassification] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -8,22 +8,19 @@ const JobClassification = ({ sessionId }) => {
     if (sessionId) {
       fetchJobClassification();
     }
-  }, [sessionId]);
+  }, [sessionId, jobDescription]);
 
   const fetchJobClassification = async () => {
     setLoading(true);
     try {
-      // First get the session data to get job description
-      const sessionResponse = await fetch(`http://localhost:5000/api/session-history/${sessionId}`);
-      const sessionData = await sessionResponse.json();
+      // Use the passed jobDescription or fallback to empty string
+      const descriptionToAnalyze = jobDescription || '';
 
-      if (!sessionData.success || !sessionData.sessions || sessionData.sessions.length === 0) {
-        console.error('No session data found');
+      if (!descriptionToAnalyze) {
+        console.error('No job description provided');
         setLoading(false);
         return;
       }
-
-      const session = sessionData.sessions[0];
 
       // Now classify the job
       const response = await fetch('http://localhost:5000/api/classify-job', {
@@ -33,14 +30,40 @@ const JobClassification = ({ sessionId }) => {
         },
         body: JSON.stringify({
           session_id: sessionId,
-          job_description: session.job_description || '',
+          job_description: descriptionToAnalyze,
           job_title: ''
         }),
       });
 
       const data = await response.json();
       if (data.success) {
-        setClassification(data.classification);
+        const raw = data.classification;
+
+        // Map backend data to frontend expected structure
+        const formatted = {
+          industry: raw.industry_classification?.primary_industry || 'General',
+          confidence: 85, // Placeholder as backend returns raw scores
+          job_level: raw.job_level,
+          years_of_experience: raw.requirements?.experience?.[0] || 'Not specified',
+          related_industries: raw.industry_classification?.secondary_industries || [],
+          requirements: {
+            must_have: raw.must_have_requirements || [],
+            nice_to_have: raw.nice_to_have_requirements || []
+          },
+          technical_skills: raw.requirements?.technical_skills || [],
+          soft_skills: raw.requirements?.soft_skills || [],
+          key_highlights: raw.insights || [],
+          work_arrangement: raw.work_arrangement?.type || 'Not specified',
+          company_type: 'Private', // Placeholder
+          complexity_score: Math.min(10, raw.complexity?.total_requirements || 5),
+          sentiment: {
+            overall: raw.sentiment_analysis?.positive_language ? 'Positive' : 'Neutral',
+            tone: raw.sentiment_analysis?.tone || 'Professional',
+            urgency_level: raw.sentiment_analysis?.work_culture_indicators?.demanding_mentions > 0 ? 'High' : 'Normal'
+          }
+        };
+
+        setClassification(formatted);
       }
     } catch (error) {
       console.error('Error fetching job classification:', error);

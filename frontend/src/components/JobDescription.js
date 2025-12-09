@@ -7,7 +7,7 @@ const JobDescription = ({ jobDescription, onChange, sessionId, onNext, onBack })
   const analyzeJobDescription = async () => {
     if (!jobDescription.trim()) {
       alert('Please enter a job description');
-      return;
+      return null;
     }
 
     setIsAnalyzing(true);
@@ -27,23 +27,33 @@ const JobDescription = ({ jobDescription, onChange, sessionId, onNext, onBack })
 
       if (data.success) {
         setAnalysis(data.job_analysis);
+        return data.job_analysis;
       } else {
         alert('Error analyzing job description: ' + data.error);
+        return null;
       }
     } catch (error) {
       console.error('Error analyzing job description:', error);
       alert('Error analyzing job description. Please try again.');
+      return null;
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!jobDescription.trim()) {
       alert('Please enter a job description');
       return;
     }
-    onNext(jobDescription);
+
+    // Always analyze before proceeding to ensure backend session is updated
+    // This fixes the issue where tabs like "Skills Match" and "Job Analysis" were empty
+    const result = await analyzeJobDescription();
+
+    if (result) {
+      onNext(jobDescription);
+    }
   };
 
   return (
@@ -81,7 +91,7 @@ const JobDescription = ({ jobDescription, onChange, sessionId, onNext, onBack })
               </span>
             </div>
             <button
-              onClick={analyzeJobDescription}
+              onClick={() => analyzeJobDescription()}
               disabled={!jobDescription.trim() || isAnalyzing}
               className="btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -164,10 +174,10 @@ const JobDescription = ({ jobDescription, onChange, sessionId, onNext, onBack })
 
         <button
           onClick={handleNext}
-          disabled={!jobDescription.trim()}
+          disabled={!jobDescription.trim() || isAnalyzing}
           className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
-          Continue to Analysis →
+          {isAnalyzing ? 'Processing...' : 'Continue to Analysis →'}
         </button>
       </div>
 
