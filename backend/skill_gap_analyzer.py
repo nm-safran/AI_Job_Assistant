@@ -1,6 +1,7 @@
 """
 AI-Powered Skill Gap Analyzer
 Analyzes skill gaps between resume and job requirements, provides learning roadmaps
+Integrated with real-world datasets for enhanced recommendations
 """
 
 from typing import Dict, List, Any, Set
@@ -8,7 +9,10 @@ import re
 
 
 class SkillGapAnalyzer:
-    def __init__(self):
+    def __init__(self, data_processor=None):
+        # Optional data processor for real course data
+        self.data_processor = data_processor
+
         # Learning resources by skill category
         self.learning_resources = {
             'python': {
@@ -194,25 +198,56 @@ class SkillGapAnalyzer:
         return prioritized
 
     def _generate_learning_paths(self, prioritized_gaps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Generate learning paths for top priority skills"""
+        """Generate learning paths for top priority skills (using real data if available)"""
         learning_paths = []
 
         for gap in prioritized_gaps[:5]:  # Focus on top 5 gaps
             skill = gap['skill']
             skill_key = self._normalize_skill_name(skill)
 
+            # Try to get real courses from data processor
+            real_courses = []
+            if self.data_processor:
+                try:
+                    real_courses = self.data_processor.get_courses_for_skill(skill, limit=6)
+                except Exception as e:
+                    print(f"Warning: Could not load real courses for {skill}: {str(e)}")
+
+            # Fallback to hardcoded resources
             resources = self.learning_resources.get(skill_key, {
                 'beginner': ['Online tutorials', 'Official documentation', 'YouTube courses'],
                 'intermediate': ['Udemy/Coursera courses', 'Practice projects', 'Books'],
                 'advanced': ['Advanced courses', 'Open source contribution', 'Real-world projects']
             })
 
+            # Enhance with real courses if available
+            enhanced_resources = {
+                'beginner': resources['beginner'],
+                'intermediate': resources['intermediate'],
+                'advanced': resources['advanced']
+            }
+
+            if real_courses:
+                # Add top-rated real courses
+                for course in real_courses:
+                    if course.get('difficulty', '').lower() == 'beginner':
+                        enhanced_resources['beginner'].insert(
+                            0,
+                            f"{course.get('title', 'N/A')} ({course.get('source', 'Online')})"
+                        )
+                    elif course.get('difficulty', '').lower() == 'intermediate':
+                        enhanced_resources['intermediate'].insert(
+                            0,
+                            f"{course.get('title', 'N/A')} ({course.get('source', 'Online')})"
+                        )
+
             learning_paths.append({
                 'skill': skill,
                 'priority': gap['priority'],
+                'real_courses_available': len(real_courses),
                 'learning_stages': {
                     'beginner': {
-                        'resources': resources['beginner'],
+                        'resources': enhanced_resources['beginner'][:3],
                         'time_needed': f"{self.time_estimates['beginner']['weeks']} weeks",
                         'hours_per_week': self.time_estimates['beginner']['hours_per_week'],
                         'goals': [
@@ -222,7 +257,7 @@ class SkillGapAnalyzer:
                         ]
                     },
                     'intermediate': {
-                        'resources': resources['intermediate'],
+                        'resources': enhanced_resources['intermediate'][:3],
                         'time_needed': f"{self.time_estimates['intermediate']['weeks']} weeks",
                         'hours_per_week': self.time_estimates['intermediate']['hours_per_week'],
                         'goals': [
@@ -232,7 +267,7 @@ class SkillGapAnalyzer:
                         ]
                     },
                     'advanced': {
-                        'resources': resources['advanced'],
+                        'resources': enhanced_resources['advanced'][:3],
                         'time_needed': f"{self.time_estimates['advanced']['weeks']} weeks",
                         'hours_per_week': self.time_estimates['advanced']['hours_per_week'],
                         'goals': [
@@ -242,7 +277,8 @@ class SkillGapAnalyzer:
                         ]
                     }
                 },
-                'recommended_start': 'beginner'
+                'recommended_start': 'beginner',
+                'real_courses': real_courses[:3] if real_courses else None
             })
 
         return learning_paths

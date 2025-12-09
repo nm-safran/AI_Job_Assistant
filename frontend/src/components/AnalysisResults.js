@@ -5,6 +5,7 @@ import AIScoreCard from './AIScoreCard';
 import JobClassification from './JobClassification';
 import InterviewPrep from './InterviewPrep';
 import SkillGapAnalysis from './SkillGapAnalysis';
+import DatasetStatus from './DatasetStatus';
 
 const TABS = ['overview', 'ai-score', 'job-analysis', 'skills', 'skill-gaps', 'interview', 'recommendations'];
 
@@ -119,6 +120,9 @@ const AnalysisResults = ({ resumeData, jobDescription, sessionId, onNext, onBack
         </div>
       </div>
 
+      {/* Dataset Status */}
+      <DatasetStatus />
+
       {/* Tab Navigation */}
       <div className="glass-card overflow-hidden">
         <div className="flex overflow-x-auto scrollbar-hide border-b border-charcoal-700">
@@ -127,8 +131,8 @@ const AnalysisResults = ({ resumeData, jobDescription, sessionId, onNext, onBack
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`relative px-6 py-4 font-semibold text-sm transition-all duration-300 whitespace-nowrap border-b-2 ${activeTab === tab
-                  ? 'border-amber-500 text-amber-400 bg-amber-500/5'
-                  : 'border-transparent text-charcoal-400 hover:text-amber-400/70 hover:bg-charcoal-700/30'
+                ? 'border-amber-500 text-amber-400 bg-amber-500/5'
+                : 'border-transparent text-charcoal-400 hover:text-amber-400/70 hover:bg-charcoal-700/30'
                 }`}
             >
               {tab === 'overview' && '📊 Overview'}

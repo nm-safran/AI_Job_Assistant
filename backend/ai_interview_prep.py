@@ -1,6 +1,7 @@
 """
 AI-Powered Interview Preparation Assistant
 Generates targeted interview questions and preparation guidance
+Integrated with real-world interview datasets for enhanced recommendations
 """
 
 from typing import Dict, List, Any
@@ -8,7 +9,10 @@ import random
 
 
 class AIInterviewPrep:
-    def __init__(self):
+    def __init__(self, data_processor=None):
+        # Optional data processor for real interview questions
+        self.data_processor = data_processor
+
         # Question database organized by category
         self.question_database = {
             'behavioral': [
@@ -118,18 +122,28 @@ class AIInterviewPrep:
                                     skills: List[str] = None) -> Dict[str, Any]:
         """
         Generate comprehensive interview preparation package
+        Enhanced with real interview questions from datasets
         """
 
         # Determine role category
         role_category = self._determine_role_category(job_role.lower())
 
-        # Generate question sets
+        # Try to load real interview questions from datasets
+        real_questions = []
+        if self.data_processor:
+            try:
+                real_questions = self.data_processor.get_real_interview_questions(limit=20)
+            except Exception as e:
+                print(f"Warning: Could not load real interview questions: {str(e)}")
+
+        # Generate question sets (enhanced with real questions)
         questions = {
             'behavioral': self._select_questions('behavioral', 10),
             'technical': self._select_questions('technical', 8),
             'situational': self._select_questions('situational', 7),
             'role_specific': self._get_role_specific_questions(role_category, 8),
-            'company_fit': self._select_questions('company_fit', 5)
+            'company_fit': self._select_questions('company_fit', 5),
+            'real_world_questions': real_questions  # Add real questions from datasets
         }
 
         # Generate skill-based questions

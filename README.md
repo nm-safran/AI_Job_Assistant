@@ -1,123 +1,81 @@
-# 🤖 AI Job Application Assistant
+# AI Job Assistant – Implementation Guide
 
-> An intelligent, AI-powered platform that revolutionizes your job search with advanced NLP resume analysis, smart job matching, personalized recommendations, and automated cover letter generation.
+Essential setup and usage notes for the AI Job Assistant (Scenario 05). All other detailed docs have been consolidated here. See `SYSTEM_ARCHITECTURE.md` for architecture only.
 
-[![React](https://img.shields.io/badge/React-19.2.0-61DAFB?logo=react)](https://reactjs.org/)
-[![Flask](https://img.shields.io/badge/Flask-3.0+-000000?logo=flask)](https://flask.palletsprojects.com/)
-[![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python)](https://www.python.org/)
-[![spaCy](https://img.shields.io/badge/spaCy-NLP-09A3D5?logo=spacy)](https://spacy.io/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.6-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
+## Quick Start
 
----
+Backend (Terminal 1):
 
-## 🎯 Scenario 05 Implementation
-
-**"AI Job Application Assistant - Build a system that helps students prepare better resumes and job applications"**
-
-This project is a **complete implementation** of Scenario 05 with all three requirements:
-
-### ✅ Requirement 1: Analyze Resume & Suggest Missing Skills/Sections
-
-**Implementation:**
-
-- **Module:** `ai_scoring_engine.py` (AIResumeScoringEngine class)
-- **Features:**
-  - 5-dimensional scoring system (ATS, Keywords, Impact, Completeness, Professional Quality)
-  - Missing section detection (Contact, Skills, Experience, Education)
-  - Action verb analysis with 18+ verb patterns
-  - Quantifiable achievement detection
-  - Personalized recommendations with effort/impact scores
-
-**How It Works:**
-
-```python
-# Backend: backend/ai_scoring_engine.py
-scoring_engine.calculate_comprehensive_score(resume_data, job_data)
-→ Returns: Overall score (0-100), Grade (A+ to F), Missing sections, Recommendations
+```bash
+cd backend
+pip install -r requirements.txt
+python -m spacy download en_core_web_sm
+python app.py
 ```
 
-### ✅ Requirement 2: NLP to Classify Job Descriptions & Highlight Key Requirements
+Frontend (Terminal 2):
 
-**Implementation:**
-
-- **Module:** `nlp_job_classifier.py` (NLPJobClassifier class)
-- **Features:**
-  - 10+ industry classification with confidence scores
-  - Experience level detection (Entry/Mid/Senior/Executive)
-  - Must-have vs Nice-to-have skill categorization
-  - Work arrangement detection (Remote/Hybrid/On-site)
-  - Salary range indicators
-  - Company culture sentiment analysis
-
-**How It Works:**
-
-```python
-# Backend: backend/nlp_job_classifier.py
-job_classifier.classify_job_description(job_text, job_title)
-→ Returns: Industry, Experience level, Required skills, Preferred skills, Work type, Salary indicators
+```bash
+cd frontend
+npm install
+npm start
 ```
 
-### ✅ Requirement 3: Recommend Skill Improvements & Practice Interview Questions
+Health checks:
 
-**Implementation:**
-
-- **Modules:** `skill_gap_analyzer.py` + `ai_interview_prep.py`
-- **Features:**
-  - Skill gap analysis with learning roadmaps
-  - 200+ interview questions (behavioral, technical, situational)
-  - 5-day interview preparation study plans
-  - Personalized course recommendations (Beginner/Intermediate/Advanced)
-  - Time estimates for skill development (4-12 weeks per skill)
-
-**How It Works:**
-
-```python
-# Skill Improvements: backend/skill_gap_analyzer.py
-skill_gap_analyzer.analyze_skill_gaps(resume_skills, job_skills)
-→ Returns: Missing skills, Learning resources, Time estimates, Priority levels
-
-# Interview Questions: backend/ai_interview_prep.py
-interview_prep.generate_interview_questions(job_data, resume_data)
-→ Returns: 200+ questions categorized by type, 5-day study plan, Company-specific prep
+```bash
+curl http://localhost:5000/api/health
+curl http://localhost:5000/api/datasets-info
 ```
 
----
+## Required Datasets (resources/)
 
-## 📋 Table of Contents
+- Skill_Gap_Analysis: `coursera_courses.csv`, `udemy_courses.csv`, `github_projects.csv`
+- interview_prep: `new_interview_questions.csv`, `Software Questions.csv`
+- job_analysis: `glassdoor_jobs.csv`, `resume_dataset.csv`
+- salary: `salary_dataset.csv`
 
-- [Scenario 05 Implementation](#-scenario-05-implementation)
-- [Overview](#overview)
-- [Key Features](#key-features)
-- [AI & NLP Technology](#ai--nlp-technology)
-- [Architecture](#architecture)
-- [Installation](#installation)
-- [Usage Guide](#usage-guide)
-- [API Endpoints](#api-endpoints)
-- [Project Structure](#project-structure)
-- [Technologies](#technologies)
-- [Contributing](#contributing)
+## Core Workflow
 
----
+1. Upload resume (PDF/DOCX/TXT) → session created
+2. Paste job description
+3. Run analyze-match → populates 7 tabs
+4. Skill gaps tab shows real courses; Interview prep tab shows real questions
+5. Generate cover letter (optional)
 
-## 🌟 Overview
+## Key Endpoints (Flask)
 
-The **AI Job Application Assistant** is a full-stack web application that leverages cutting-edge Natural Language Processing (NLP) and Machine Learning to help job seekers optimize their applications. The platform analyzes resumes, matches them with job descriptions, provides actionable feedback, and generates tailored cover letters—all powered by advanced AI algorithms.
+- `GET /api/health` – status, version
+- `GET /api/datasets-info` – dataset load counts
+- `POST /api/upload-resume` – form-data file → session_id, resume_data
+- `POST /api/analyze-match` – {session_id}
+- `POST /api/analyze-skill-gaps` – {session_id}
+- `POST /api/generate-interview-questions` – {session_id}
+- `POST /api/generate-cover-letter` – {session_id}
 
-### What Makes It Special?
+## Feature Highlights
 
-- **7-Tab Comprehensive Analysis**: Deep insights across Overview, AI Score, Job Analysis, Skills Match, Skill Gaps, Interview Prep, and AI Recommendations
-- **Advanced NLP Pipeline**: Uses spaCy, TF-IDF vectorization, and custom ML models
-- **Real-time Processing**: Instant analysis and feedback
-- **Modern UI/UX**: Beautiful gradient design with smooth animations
-- **100% Free**: No API keys or paid services required
+- Resume scoring: ATS, keywords, impact, completeness, professional quality
+- Job analysis: industry, experience level, must-have vs nice-to-have skills
+- Skill gaps: prioritized skills + real Coursera/Udemy courses + GitHub projects
+- Interview prep: 200 AI + 49 real questions with answers/hints
+- Cover letter: AI-generated from resume + job description
 
----
+## Testing
 
-## 🚀 Key Features
+- Integration check: `python test_integration.py`
+- Manual: upload sample resume/job → verify tabs render; tabs 5/6 show real data; dataset status green
 
-### 1️⃣ **AI Resume Scoring Engine**
+## Troubleshooting
 
-Our proprietary scoring system evaluates your resume across 5 critical dimensions:
+- spaCy model missing: `python -m spacy download en_core_web_sm`
+- Ports busy: use different port or stop processes on 5000/3000
+- Datasets missing: ensure files exist under `resources/` with exact names
+
+## Notes
+
+- Keep `SYSTEM_ARCHITECTURE.md` for high-level diagrams only.
+- All other operational info is in this README.
 
 | Dimension                 | Score Range | What It Measures                                                        |
 | ------------------------- | ----------- | ----------------------------------------------------------------------- |

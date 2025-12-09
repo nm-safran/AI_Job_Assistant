@@ -10,3 +10,7 @@ public/build
 .vscode
 .DS_Store
 *.log
+__pycache__/
+*.pyc
+backend/instance/job_assistant.db
+resources/tech_skills/stackoverflow_survey.csv

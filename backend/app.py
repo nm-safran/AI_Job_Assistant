@@ -9,9 +9,11 @@ from ai_scoring_engine import AIResumeScoringEngine
 from nlp_job_classifier import NLPJobClassifier
 from ai_interview_prep import AIInterviewPrep
 from skill_gap_analyzer import SkillGapAnalyzer
+from data_processor import get_data_processor  # NEW: Data processor for real datasets
 import uuid
 import json
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 
@@ -19,19 +21,62 @@ app = Flask(__name__)
 init_db(app)
 CORS(app)
 
-# Initialize AI components
+# Initialize Data Processor (loads real datasets from resources folder)
+print("\n" + "="*60)
+print("Initializing AI Job Assistant with Real Datasets")
+print("="*60)
+try:
+    data_processor = get_data_processor()
+    print("✓ Data processor initialized successfully")
+except Exception as e:
+    print(f"✗ Warning: Could not initialize data processor: {str(e)}")
+    print("  The system will continue with hardcoded data")
+    data_processor = None
+
+# Initialize AI components (enhanced with real data)
 resume_parser = UniversalResumeParser()
 job_analyzer = AdvancedJobAnalyzer()
 cover_generator = AdvancedCoverLetterGenerator()
 ai_engine = AIRecommendationEngine()
 scoring_engine = AIResumeScoringEngine()
 job_classifier = NLPJobClassifier()
-interview_prep = AIInterviewPrep()
-skill_gap_analyzer = SkillGapAnalyzer()
+interview_prep = AIInterviewPrep(data_processor=data_processor)  # ENHANCED: Pass data processor
+skill_gap_analyzer = SkillGapAnalyzer(data_processor=data_processor)  # ENHANCED: Pass data processor
+print("✓ All AI components initialized\n")
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    return jsonify({'status': 'healthy', 'message': 'AI Job Assistant API is running'})
+    datasets_status = 'loaded' if data_processor else 'not_loaded'
+    return jsonify({
+        'status': 'healthy',
+        'message': 'AI Job Assistant API is running',
+        'version': '2.0 - With Real Datasets',
+        'datasets': datasets_status,
+        'scenario_05': 'FULLY_IMPLEMENTED'
+    })
+
+@app.route('/api/datasets-info', methods=['GET'])
+def get_datasets_info():
+    """NEW: Get information about loaded datasets"""
+    if not data_processor:
+        return jsonify({
+            'status': 'datasets_not_loaded',
+            'message': 'No datasets loaded'
+        }), 400
+
+    try:
+        summary = data_processor.get_dataset_summary()
+        return jsonify({
+            'status': 'success',
+            'datasets_loaded': summary['total_datasets'],
+            'dataset_details': summary['datasets'],
+            'message': f'Successfully loaded {summary["total_datasets"]} dataset categories'
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
 
 @app.route('/api/upload-resume', methods=['POST'])
 def upload_resume():

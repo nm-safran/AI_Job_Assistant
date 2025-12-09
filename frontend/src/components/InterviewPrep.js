@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import RealQuestionsDisplay from './RealQuestionsDisplay';
 
 const InterviewPrep = ({ sessionId }) => {
   const [interviewData, setInterviewData] = useState(null);
@@ -229,6 +230,16 @@ const InterviewPrep = ({ sessionId }) => {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Real Interview Questions from Kaggle Datasets */}
+            {interviewData.real_world_questions && interviewData.real_world_questions.length > 0 && (
+              <div className="mt-8">
+                <RealQuestionsDisplay
+                  questions={interviewData.real_world_questions}
+                  category="Real Dataset"
+                />
               </div>
             )}
           </div>
