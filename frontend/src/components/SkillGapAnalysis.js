@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import RealCoursesDisplay from './RealCoursesDisplay';
+import RealProjectsDisplay from './RealProjectsDisplay';
 
 const SkillGapAnalysis = ({ sessionId }) => {
   const [skillGapData, setSkillGapData] = useState(null);
@@ -228,6 +229,11 @@ const SkillGapAnalysis = ({ sessionId }) => {
                   {/* Real Courses from Kaggle Datasets */}
                   {skill.real_courses && skill.real_courses.length > 0 && (
                     <RealCoursesDisplay courses={skill.real_courses} skill={skill.skill} />
+                  )}
+
+                  {/* Real Projects from GitHub Datasets */}
+                  {skill.real_projects && skill.real_projects.length > 0 && (
+                    <RealProjectsDisplay projects={skill.real_projects} skill={skill.skill} />
                   )}
 
                   {/* Market Data */}

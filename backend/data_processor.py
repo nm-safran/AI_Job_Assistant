@@ -314,11 +314,12 @@ class DataProcessor:
 
         df = self.datasets['github_projects']
 
-        # Filter by language/skill
+        # Filter by language/skill OR repository name
         projects = df[
             (df['language'].str.lower() == skill.lower()) |
-            (df['language'].str.contains(skill, case=False, na=False))
-        ].head(limit)
+            (df['language'].str.contains(skill, case=False, na=False)) |
+            (df['repositories'].str.contains(skill, case=False, na=False))
+        ].sort_values('stars_count', ascending=False).head(limit)
 
         result = []
         for _, row in projects.iterrows():

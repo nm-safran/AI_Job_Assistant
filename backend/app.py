@@ -195,9 +195,74 @@ def analyze_match():
         matching_skills = list(set(resume_skills_lower) & set(job_skills_lower))
         missing_skills = list(set(job_skills_lower) - set(resume_skills_lower))
 
-        # Get AI recommendations
-        skill_recommendations = ai_engine.get_skill_recommendations(missing_skills, resume_skills)
-        improvement_plan = ai_engine.calculate_improvement_plan(missing_skills)
+        # Get AI recommendations using Real Datasets
+        resume_data_struct = {'skills': resume_skills}
+        job_data_struct = {'skills': job_skills, 'description': session.job_description or ''}
+
+        # Use Skill Gap Analyzer to pull real courses and projects
+        gap_results = skill_gap_analyzer.analyze_skill_gaps(resume_data_struct, job_data_struct)
+        learning_paths = gap_results.get('learning_paths', [])
+
+        skill_recommendations = []
+        if learning_paths:
+            for path in learning_paths:
+                # Format courses
+                courses_list = []
+                if path.get('real_courses'):
+                    courses_list = [f"{c.get('title')} ({c.get('source')})" for c in path.get('real_courses')]
+                else:
+                    # Fallback
+                    courses_list = path.get('learning_stages', {}).get('beginner', {}).get('resources', [])
+
+                # Format projects
+                projects_list = []
+                if path.get('real_projects'):
+                    projects_list = [f"Build {p.get('name')} (Stars: {p.get('stars')})" for p in path.get('real_projects')]
+                else:
+                    # Fallback projects
+                    projects_list = [
+                        f"Build a basic {path['skill']} application",
+                        f"Contribute to {path['skill']} open source",
+                        "Create a portfolio showcase"
+                    ]
+
+                # Format practice/goals
+                practice_list = []
+                # Combine goals from stages
+                practice_list.extend(path.get('learning_stages', {}).get('beginner', {}).get('goals', []))
+
+                skill_recommendations.append({
+                    'skill': path['skill'],
+                    'level': 'Beginner to Advanced',
+                    'priority': path['priority'],
+                    'courses': courses_list[:4],
+                    'projects': projects_list[:3],
+                    'practice': practice_list[:4],
+                    'timeline': f"{path.get('learning_stages', {}).get('beginner', {}).get('time_needed', '4 weeks')}"
+                })
+        else:
+             # Fallback if no gaps found or data issue
+             skill_recommendations = ai_engine.get_skill_recommendations(missing_skills, resume_skills)
+
+        # Transform roadmap to detailed improvement plan
+        roadmap = gap_results.get('roadmap', {})
+        if roadmap and roadmap.get('phases') and learning_paths:
+            # Construct a linear list of goals from phases
+            weekly_goals = []
+            for phase in roadmap['phases']:
+                weekly_goals.append(f"Phase {phase['phase']} ({phase['duration']}): {phase['focus']}")
+                weekly_goals.extend([f"  - {m}" for m in phase['milestones']])
+
+            improvement_plan = {
+                'timeline': f"{len(roadmap['phases']) * 8} Weeks typically",
+                'expected_outcome': "Job-ready proficiency in identified skill gaps with portfolio projects",
+                'weekly_goals': weekly_goals,
+                'resources_needed': ["Online Course Platforms (Coursera/Udemy)", "GitHub for portfolio", "Development Environment"],
+                'success_metrics': ["Completion of capstone projects", "Self-assessment score > 80%", "Updated Resume with new skills"]
+            }
+        else:
+            improvement_plan = ai_engine.calculate_improvement_plan(missing_skills)
+
         personalized_questions = ai_engine.generate_personalized_questions(resume_skills, job_skills)
 
         # Get missing sections suggestions
@@ -511,42 +576,8 @@ def get_interview_answer():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/analyze-skill-gaps', methods=['POST'])
-def analyze_skill_gaps():
-    """Analyze skill gaps and generate learning roadmap"""
-    try:
-        data = request.json
-        session_id = data.get('session_id')
 
-        if not session_id:
-            return jsonify({'error': 'Session ID is required'}), 400
 
-        # Get session data
-        session = UserSession.query.filter_by(session_id=session_id).first()
-        if not session:
-            return jsonify({'error': 'Session not found'}), 404
-
-        # Prepare resume data
-        resume_data = {
-            'skills': json.loads(session.resume_skills) if session.resume_skills else []
-        }
-
-        # Prepare job data
-        job_data = {
-            'description': session.job_description,
-            'skills': json.loads(session.job_skills) if session.job_skills else []
-        }
-
-        # Analyze skill gaps
-        gap_analysis = skill_gap_analyzer.analyze_skill_gaps(resume_data, job_data)
-
-        return jsonify({
-            'success': True,
-            'skill_gap_analysis': gap_analysis
-        })
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/comprehensive-analysis', methods=['POST'])
 def comprehensive_analysis():
@@ -599,6 +630,111 @@ def comprehensive_analysis():
         })
 
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/analyze-skill-gaps', methods=['POST'])
+def analyze_skill_gaps():
+    """Detailed skill gap analysis with real courses and projects"""
+    try:
+        data = request.json
+        session_id = data.get('session_id')
+
+        if not session_id:
+            return jsonify({'error': 'Session ID is required'}), 400
+
+        # Get session data
+        session = UserSession.query.filter_by(session_id=session_id).first()
+        if not session:
+            return jsonify({'error': 'Session not found'}), 404
+
+        resume_data = {
+            'skills': json.loads(session.resume_skills) if session.resume_skills else []
+        }
+
+        job_data = {
+            'description': session.job_description,
+            'skills': json.loads(session.job_skills) if session.job_skills else []
+        }
+
+        # Run analysis
+        analysis = skill_gap_analyzer.analyze_skill_gaps(resume_data, job_data)
+
+        # Transform for frontend structure
+        skills_formatted = []
+        learning_paths_map = {p['skill']: p for p in analysis.get('learning_paths', [])}
+
+        for gap in analysis.get('prioritized_gaps', []):
+            skill_name = gap['skill']
+            path = learning_paths_map.get(skill_name, {})
+
+            # Format resources
+            resources = []
+            if path.get('learning_stages'):
+                resources.extend(path['learning_stages']['beginner']['resources'])
+
+            # Estimate time
+            est_time = "4 weeks"
+            if path.get('learning_stages'):
+                est_time = path['learning_stages']['beginner']['time_needed']
+
+            # Reason
+            reason = f"Essential for this role. Mentioned {gap.get('mentions_in_job', 0)} times in job description."
+            if gap.get('priority') == 'Critical':
+                reason = "Critical requirement. High market demand and direct relevance to job."
+
+            skills_formatted.append({
+                'skill': skill_name,
+                'category': 'Technical', # Simplified
+                'priority': gap.get('priority', 'Medium'),
+                'readiness_score': 15, # Starting from scratch
+                'reason': reason,
+                'learning_path': "Start with fundamentals, then build a project.",
+                'resources': resources,
+                'estimated_time': est_time,
+                'real_courses': path.get('real_courses', []),
+                'real_projects': path.get('real_projects', []),
+                'market_demand': f"{gap.get('market_demand', 50)}/100",
+                'salary_impact': gap.get('salary_impact', 'Low'),
+                'growth_trend': gap.get('growth_trend', 'Stable')
+            })
+
+            # Add projects to resources for display
+            if path.get('real_projects'):
+                for proj in path.get('real_projects'):
+                    repo_name = proj.get('name', 'Project')
+                    resources.append(f"Project: {repo_name} (Stars: {proj.get('stars', 0)})")
+
+        response_data = {
+            'gap_metrics': {
+                'overall_match_percentage': analysis.get('readiness_score', {}).get('score', 0),
+                'total_gaps': len(analysis.get('missing_skills', [])),
+                'critical_gaps': len([s for s in skills_formatted if s['priority'] == 'Critical']),
+                'estimated_weeks': analysis.get('time_estimate', {}).get('total_weeks', 8)
+            },
+            'prioritized_skills': skills_formatted,
+            'learning_roadmap': {
+                'estimated_weeks': analysis.get('time_estimate', {}).get('total_weeks', 8),
+                'phases': []
+            }
+        }
+
+        # Format phases from roadmap
+        if analysis.get('roadmap') and analysis.get('roadmap').get('phases'):
+            for p in analysis.get('roadmap').get('phases'):
+                response_data['learning_roadmap']['phases'].append({
+                    'phase': p['phase'],
+                    'phase_name': p['focus'],
+                    'duration': p['duration'],
+                    'description': f"Focus on {', '.join(p['skills'])}. Milestones: {'; '.join(p['milestones'])}."
+                })
+
+        return jsonify({
+            'success': True,
+            'skill_gap_analysis': response_data
+        })
+
+    except Exception as e:
+        print(f"Error in analyze-skill-gaps: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':

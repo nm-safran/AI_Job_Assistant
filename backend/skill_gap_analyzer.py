@@ -205,13 +205,15 @@ class SkillGapAnalyzer:
             skill = gap['skill']
             skill_key = self._normalize_skill_name(skill)
 
-            # Try to get real courses from data processor
+            # Try to get real courses and projects from data processor
             real_courses = []
+            real_projects = []
             if self.data_processor:
                 try:
                     real_courses = self.data_processor.get_courses_for_skill(skill, limit=6)
+                    real_projects = self.data_processor.get_project_ideas(skill, limit=3)
                 except Exception as e:
-                    print(f"Warning: Could not load real courses for {skill}: {str(e)}")
+                    print(f"Warning: Could not load real data for {skill}: {str(e)}")
 
             # Fallback to hardcoded resources
             resources = self.learning_resources.get(skill_key, {
@@ -240,6 +242,16 @@ class SkillGapAnalyzer:
                             0,
                             f"{course.get('title', 'N/A')} ({course.get('source', 'Online')})"
                         )
+
+            if real_projects:
+                # Add real project ideas
+                for project in real_projects:
+                    proj_text = f"Build: {project.get('name', 'Project')} (GitHub Stars: {project.get('stars', 0)})"
+                    # Add to intermediate or advanced based on difficulty
+                    if project.get('difficulty') == 'High':
+                        enhanced_resources['advanced'].insert(0, proj_text)
+                    else:
+                        enhanced_resources['intermediate'].insert(0, proj_text)
 
             learning_paths.append({
                 'skill': skill,
@@ -278,7 +290,8 @@ class SkillGapAnalyzer:
                     }
                 },
                 'recommended_start': 'beginner',
-                'real_courses': real_courses[:3] if real_courses else None
+                'real_courses': real_courses[:3] if real_courses else None,
+                'real_projects': real_projects if real_projects else None
             })
 
         return learning_paths
